@@ -1,3 +1,4 @@
+import { isCorrect, normalizeSelection } from './grading';
 import { DOMAIN_WEIGHTS, DUPLICATE_PAIRS, domainOf, getQuestion, type Question } from './content';
 
 export const EXAM_SIZE = 60;
@@ -33,9 +34,8 @@ export function grade(nums: number[], answers: Answers): ExamResult {
   const by_domain: ExamResult['by_domain'] = {};
   const items = nums.map((num) => {
     const q = getQuestion(num)!; const domain = domainOf(q);
-    const selected = [...new Set(answers[String(num)] ?? [])].filter((l) => q.options.some((o) => o.label === l)).sort();
-    const ans = [...q.answer].sort();
-    const correct = selected.length === ans.length && selected.every((l, i) => l === ans[i]);
+    const selected = normalizeSelection(q, answers[String(num)] ?? []);
+    const correct = isCorrect(q, selected);
     (by_domain[domain] ??= { correct: 0, total: 0 }); by_domain[domain].total++; if (correct) by_domain[domain].correct++;
     return { num, selected, answer: q.answer, correct, domain };
   });
