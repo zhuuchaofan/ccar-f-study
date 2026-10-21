@@ -22,7 +22,7 @@ test('full learning loop persists across logout/login', async ({ page, request }
   await page.getByTestId('submit').click();
   await expect(page.getByTestId('result')).toContainText('回答错误，正确答案：A');
   await expect(page.getByTestId('result')).toContainText('PDF 第');
-  await page.getByRole('button', { name: /收藏/ }).click(); await expect(page.getByRole('button', { name: '★ 已收藏' })).toBeVisible();
+  await page.getByRole('button', { name: '收藏', exact: true }).click(); await expect(page.getByRole('button', { name: '取消收藏' })).toBeVisible();
   await page.getByTestId('next').click();
   // keyboard: press 1 then Enter to submit on Q2
   await expect(page.getByText('第 2 题').first()).toBeVisible();

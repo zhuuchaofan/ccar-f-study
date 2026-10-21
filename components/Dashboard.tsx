@@ -8,7 +8,7 @@ export default function Dashboard() {
   if (state === 'loading') return <p className="muted">加载中…</p>;
   if (state === 'anon' || !data) return (
     <section className="card p-6">
-      <h1 className="text-2xl font-bold">CCAR-F 学习平台</h1>
+      <h1 className="t-title">CCAR-F 学习平台</h1>
       <p className="muted mt-2">Claude Certified Architect – Foundations 备考：官方大纲课程、题库练习、错题复习。中文为主，日文与英文对照。</p>
       <div className="mt-5 flex gap-3"><Link className="btn btn-primary" href="/login">登录 / 注册</Link><Link className="btn" href="/syllabus">先看课程大纲</Link></div>
     </section>
@@ -36,11 +36,11 @@ export default function Dashboard() {
     <div className="space-y-6">
       <section className="card p-6">
         <p className="muted text-sm">继续学习</p>
-        <h1 className="mt-1 text-2xl font-bold">{last ? `上次做到第 ${last.question_num} 题` : '从第 1 题开始'}</h1>
+        <h1 className="mt-1 t-title">{last ? `上次做到第 ${last.question_num} 题` : '从第 1 题开始'}</h1>
         <Link href={resumeHref} className="btn btn-primary mt-4">{last ? '继续' : '开始'}</Link>
       </section>
       <section>
-        <h2 className="mb-3 text-lg font-bold">今天学什么</h2>
+        <h2 className="mb-3 t-h2">今天学什么</h2>
         <ul className="space-y-2">{tasks.slice(0, 4).map((t) => (
           <li key={t.href}><Link href={t.href} className="card flex items-center justify-between p-4"><span><b>{t.title}</b><span className="muted block text-sm">{t.sub}</span></span><span aria-hidden>›</span></Link></li>))}</ul>
       </section>
