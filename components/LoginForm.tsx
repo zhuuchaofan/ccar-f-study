@@ -12,7 +12,7 @@ export default function LoginForm({ inviteRequired, googleClientId, next }: { in
     e.preventDefault(); setBusy(true); setErr('');
     const r = await fetch(`/api/auth/${mode}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(mode === 'register' ? { email, password, invite } : { email, password }) });
     const d = await r.json().catch(() => ({}));
-    if (r.ok) location.href = next; else { setErr(d.error || '失败'); setBusy(false); }
+    if (r.ok) location.href = next; else { setErr(d.message || '失败'); setBusy(false); }
   }
   // Google sign-in: a new account needs the invite code, so the credential waits until it is entered.
   const [pending, setPending] = useState<string | null>(null);
@@ -23,7 +23,7 @@ export default function LoginForm({ inviteRequired, googleClientId, next }: { in
     const d = await r.json().catch(() => ({}));
     if (r.ok) { location.href = next; return; }
     setBusy(false);
-    if (d.error === 'invite_required') { setPending(credential); setErr('这是新账号，请输入邀请码后继续'); } else setErr(d.error || '失败');
+    if (d.error === 'invite_required') { setPending(credential); setErr('这是新账号，请输入邀请码后继续'); } else setErr(d.message || '失败');
   }
   const googleRef = useRef(google); googleRef.current = google;
   useEffect(() => {

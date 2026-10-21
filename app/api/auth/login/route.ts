@@ -1,15 +1,12 @@
 import { z } from 'zod';
 import { checkLogin, startSession, throttled, noteFailure, clearFailures } from '@/core/auth';
-import { json, isJson } from '@/core/http';
+import { fail, handler } from '@/core/http';
 const Body = z.object({ email: z.string().email().max(200), password: z.string().min(1).max(200) });
-export async function POST(req: Request) {
-  if (!isJson(req)) return json({ error: 'bad_request' }, 400);
-  const p = Body.safeParse(await req.json().catch(() => null));
-  if (!p.success) return json({ error: '请输入邮箱和密码' }, 400);
-  const key = p.data.email.toLowerCase();
-  if (throttled(key)) return json({ error: '尝试次数过多，请 1 分钟后再试' }, 429);
-  const id = await checkLogin(p.data.email, p.data.password);
-  if (!id) { noteFailure(key); return json({ error: '邮箱或密码不正确' }, 401); }
-  clearFailures(key); await startSession(id);
-  return json({ ok: true });
-}
+export const POST = handler({ auth: false, body: Body, invalid: '请输入邮箱和密码' }, async ({ body }) => {
+  const key = body.email.toLowerCase();
+  if (throttled(key)) fail(429, 'throttled', '尝试次数过多，请 1 分钟后再试');
+  const id = await checkLogin(body.email, body.password);
+  if (!id) { noteFailure(key); fail(401, 'bad_credentials', '邮箱或密码不正确'); }
+  clearFailures(key); await startSession(id!);
+  return { ok: true };
+});

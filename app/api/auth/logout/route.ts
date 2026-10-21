@@ -1,3 +1,3 @@
 import { endSession } from '@/core/auth';
-import { json } from '@/core/http';
-export async function POST() { await endSession(); return json({ ok: true }); }
+import { handler } from '@/core/http';
+export const POST = handler({ auth: false }, async () => { await endSession(); return { ok: true }; });
