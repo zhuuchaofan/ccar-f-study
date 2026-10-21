@@ -16,4 +16,6 @@ export function mastery(p: Progress): number {
   const acc = p.correct / p.attempts;
   return Math.round((p.box / 5) * 70 + acc * 30);
 }
+/** Progress row as sent to the client: adds the 0..100 mastery estimate. */
+export const withMastery = <T extends Progress>(p: T) => ({ ...p, mastery: mastery(p) });
 export const isDue = (p: Progress, now: number) => p.attempts > 0 && p.due_at !== null && p.due_at <= now;
