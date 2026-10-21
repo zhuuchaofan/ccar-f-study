@@ -21,10 +21,10 @@ export default function Stats() {
   return (
     <div className="space-y-8">
       <h1 className="t-title">学习统计</h1>
-      <section><h2 className="mb-2 font-bold">各领域掌握度</h2><ul className="space-y-3">{rows.map((r) => (
+      <section><h2 className="mb-1 font-bold">各领域掌握度</h2><p className="muted mb-2 text-xs">正确率 = 答对次数 ÷ 作答次数；掌握度 = 题目的间隔复习进度，连续答对越多越高。</p><ul className="space-y-3">{rows.map((r) => (
         <li key={r.d} className="card p-3"><div className="flex justify-between text-sm"><span>领域 {r.d}：{DOMAIN_ZH[r.d]}</span><span className="muted">{r.acc === null ? '未开始' : `正确率 ${r.acc}% · 掌握度 ${r.m}%`}</span></div><div className="bar mt-2" role="img" aria-label={`掌握度 ${r.m}%`}><i style={{ width: `${r.m}%` }} /></div></li>))}</ul></section>
       <section><h2 className="mb-2 font-bold">薄弱领域排行</h2>{rank.length === 0 ? <p className="muted text-sm">做题后显示。</p> : <ol className="list-decimal pl-5 text-sm">{rank.map((r) => <li key={r.d}>领域 {r.d}：{DOMAIN_ZH[r.d]}（{r.acc}%）</li>)}</ol>}</section>
-      <section><h2 className="mb-2 font-bold">学习日历（近 28 天）</h2><div className="grid grid-cols-7 gap-1" role="img" aria-label="近 28 天每日做题数">{days.map((d) => { const n = perDay[d] ?? 0; return <div key={d} title={`${d}：${n} 题`} className="aspect-square rounded" style={{ background: n ? 'var(--accent)' : 'var(--line)', opacity: n ? Math.min(1, 0.3 + n / 15) : 1 }} />; })}</div></section>
+      <section><h2 className="mb-2 font-bold">学习日历（近 28 天）<span className="muted ml-2 text-xs font-normal">颜色越深，当天做题越多</span></h2><div className="grid grid-cols-7 gap-1" role="img" aria-label="近 28 天每日做题数">{days.map((d) => { const n = perDay[d] ?? 0; return <div key={d} title={`${d}：${n} 题`} className="aspect-square rounded" style={{ background: n ? 'var(--accent)' : 'var(--line)', opacity: n ? Math.min(1, 0.3 + n / 15) : 1 }} />; })}</div></section>
     </div>
   );
 }

@@ -102,3 +102,14 @@ test('login next only accepts same-site paths', async ({ page }) => {
   await page.getByLabel('邮箱').fill(email()); await page.getByLabel(/密码/).fill('password123');
   await page.getByRole('button', { name: '创建账号' }).click(); await page.waitForURL('/');
 });
+
+test('question bank search filters the list', async ({ page }) => {
+  await register(page, email());
+  await page.goto('/questions');
+  const all = await page.locator('main li').count();
+  await page.getByLabel('搜索题目').fill('#5');
+  await expect(page.locator('main li')).toHaveCount(1);
+  await page.getByLabel('搜索题目').fill('zzzzqqq');
+  await expect(page.getByText('没有符合条件的题目')).toBeVisible();
+  expect(all).toBe(152);
+});

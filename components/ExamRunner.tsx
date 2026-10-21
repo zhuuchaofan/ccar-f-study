@@ -79,10 +79,10 @@ export default function ExamRunner({ id }: { id: string }) {
       </div>
       <section className="card p-3" aria-label="题目导航">
         <p className="muted mb-2 text-xs">题目导航：实心为已答，⚑ 为标记</p>
-        <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-12">{exam.questions.map((x, i) => {
+        <div className="grid grid-cols-6 gap-2 sm:grid-cols-10">{exam.questions.map((x, i) => {
           const done = (answers[x.num] ?? []).length > 0;
           return <button key={x.num} onClick={() => setIdx(i)} aria-label={`第 ${i + 1} 题${done ? '，已答' : ''}${flags.has(x.num) ? '，已标记' : ''}`} aria-current={i === idx}
-            className="rounded-md border text-xs" style={{ minHeight: 34, borderColor: i === idx ? 'var(--accent)' : 'var(--line)', background: done ? 'var(--accent)' : 'var(--surface)', color: done ? 'var(--accent-ink)' : 'var(--ink)', fontWeight: i === idx ? 700 : 400 }}>{flags.has(x.num) ? '⚑' : i + 1}</button>;
+            className="rounded-md border text-xs" style={{ minHeight: 44, borderColor: i === idx ? 'var(--accent)' : 'var(--line)', background: done ? 'var(--accent)' : 'var(--surface)', color: done ? 'var(--accent-ink)' : 'var(--ink)', fontWeight: i === idx ? 700 : 400 }}>{flags.has(x.num) ? '⚑' : i + 1}</button>;
         })}</div>
       </section>
       {err && <p role="alert" style={{ color: 'var(--bad)' }}>{err}</p>}
