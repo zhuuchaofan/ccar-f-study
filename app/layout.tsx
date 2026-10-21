@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="border-b" style={{ borderColor: 'var(--line)' }}>
           <nav className="mx-auto flex max-w-4xl flex-wrap items-center gap-x-5 gap-y-1 px-4 py-3 text-sm" aria-label="主导航">
             <Link href="/" className="font-bold" style={{ color: 'var(--accent)' }}>CCAR-F</Link>
-            <Link href="/practice">练习</Link><Link href="/syllabus">课程</Link><Link href="/questions">题库</Link><Link href="/stats">统计</Link>
+            <Link href="/practice">练习</Link><Link href="/syllabus">课程</Link><Link href="/exam">模考</Link><Link href="/questions">题库</Link><Link href="/stats">统计</Link>
             <span className="ml-auto"><NavUser /></span>
           </nav>
         </header>

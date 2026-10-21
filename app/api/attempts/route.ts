@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { getQuestion } from '@/core/content';
+import { explanations, getQuestion, getTaskStatement } from '@/core/content';
 import { json, isJson, requireUser } from '@/core/http';
 import { repo } from '@/core/repo';
 import { mastery } from '@/core/srs';
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   const correct = sel.length === q.answer.length && sel.every((l, i) => l === [...q.answer].sort()[i]);
   const progress = repo.recordAttempt(u.id, q.num, sel, correct, p.data.ms ?? null, p.data.mode ?? null);
   return json({
-    correct, answer: q.answer, explanation_en: q.explanation_en,
+    correct, answer: q.answer, explanation_en: q.explanation_en, i18n: explanations(q), task_statement: q.task_statement ? { id: q.task_statement, title_zh: getTaskStatement(q.task_statement)?.title_zh ?? '' } : null,
     source: { type: q.source_type, name: q.source_name, pdf_pages: q.pdf_pages, review_status: q.review_status },
     progress: { ...progress, mastery: mastery(progress) },
   });

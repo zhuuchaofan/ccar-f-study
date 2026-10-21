@@ -7,6 +7,7 @@ const modes = [
   { href: '/practice/run?mode=due', t: '到期复习', s: '间隔重复安排到今天的题' },
   { href: '/practice/run?mode=mistakes', t: '错题重做', s: '最近一次答错的题' },
   { href: '/practice/run?mode=bookmarks', t: '收藏题', s: '你标记的题' },
+  { href: '/exam', t: '模拟考试', s: '60 题 · 120 分钟 · 交卷后出分' },
 ];
 export default function Practice() {
   return (
@@ -15,7 +16,7 @@ export default function Practice() {
       <ul className="grid gap-3 sm:grid-cols-2">{modes.map((m) => <li key={m.href}><Link className="card block p-4" href={m.href}><b>{m.t}</b><span className="muted block text-sm">{m.s}</span></Link></li>)}</ul>
       <section><h2 className="mb-2 font-bold">按领域</h2>
         <ul className="grid gap-3 sm:grid-cols-2">{[1, 2, 3, 4, 5].map((d) => <li key={d}><Link className="card block p-4" href={`/practice/run?mode=seq&domain=${d}`}>领域 {d}：{DOMAIN_ZH[d]}</Link></li>)}</ul>
-        <p className="muted mt-2 text-sm">按知识点（Task Statement）刷题需要先完成题目与知识点的映射，目前尚未提供。</p>
+        <p className="muted mt-2 text-sm">按知识点刷题：在 <Link className="underline" href="/syllabus">课程</Link> 里打开任意一条 Task Statement，页面底部可以练习对应题目。</p>
       </section>
     </div>
   );

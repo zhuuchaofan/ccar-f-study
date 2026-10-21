@@ -50,9 +50,41 @@ test('syllabus: all 5 domains and 30 task statements are reachable', async ({ pa
 });
 test('no horizontal overflow on key pages', async ({ page }) => {
   await register(page, email());
-  for (const p of ['/', '/practice', '/practice/run?mode=seq', '/syllabus', '/syllabus/1.2', '/questions', '/stats']) {
+  for (const p of ['/', '/practice', '/practice/run?mode=seq', '/syllabus', '/syllabus/1.2', '/syllabus/3.1', '/questions', '/stats', '/exam']) {
     await page.goto(p); await page.waitForLoadState('networkidle');
     const over = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(over, p).toBeLessThanOrEqual(0);
   }
+});
+test('language tabs show AI translation drafts with the English original available', async ({ page }) => {
+  await register(page, email());
+  await page.goto('/practice/run?mode=seq');
+  await page.getByRole('tab', { name: '中文' }).click();
+  await expect(page.getByTestId('stem')).toContainText('CLAUDE.md');
+  await expect(page.getByText('AI 翻译草稿').first()).toBeVisible();
+  await page.getByRole('tab', { name: '日本語' }).click();
+  await expect(page.getByTestId('stem')).toContainText('パイプライン');
+  await page.getByTestId('opt-A').click(); await page.getByTestId('submit').click();
+  await expect(page.getByTestId('explanation')).toContainText('CLAUDE.md');
+  await expect(page.getByText(/対応|对应大纲/).first()).toBeVisible();
+  await page.getByRole('tab', { name: 'English' }).click();
+  await expect(page.getByTestId('stem')).toContainText('Continuous Integration');
+});
+test('mock exam: 60 questions, no feedback until submit, then per-domain results', async ({ page }) => {
+  await register(page, email());
+  await page.goto('/exam'); await page.getByTestId('exam-start').click(); await page.waitForURL(/\/exam\/\d+/);
+  await expect(page.getByText('第 1 / 60 题')).toBeVisible();
+  await expect(page.getByTestId('timer')).toContainText(/1:59:|2:00:00/);
+  for (let i = 0; i < 3; i++) { await page.getByTestId('opt-A').click(); await expect(page.getByText('回答正确')).toHaveCount(0); await page.getByTestId('exam-next').click(); }
+  await page.reload(); await expect(page.getByText('已答 3/60')).toBeVisible(); // answers survive reload
+  await page.getByTestId('exam-submit').click(); await expect(page.getByText(/还有 57 题没答/)).toBeVisible();
+  await page.getByTestId('exam-confirm').click();
+  await expect(page.getByTestId('exam-result')).toContainText('各领域');
+  await expect(page.getByTestId('exam-result')).toContainText('/ 60');
+  await page.goto('/exam'); await expect(page.getByText('考试记录')).toBeVisible();
+});
+test('lesson pages render the lesson and linked questions', async ({ page }) => {
+  await page.goto('/syllabus/1.1');
+  await expect(page.getByTestId('lesson')).toContainText('这一条考什么');
+  await expect(page.getByText(/对应题目（\d+）/)).toBeVisible();
 });

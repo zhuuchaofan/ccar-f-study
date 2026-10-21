@@ -14,6 +14,8 @@ export async function GET(req: Request) {
   const now = Date.now();
   let qs = getQuestions();
   if (domain) qs = qs.filter((q) => domainOf(q) === domain);
+  const ts = url.searchParams.get('ts');
+  if (ts) qs = qs.filter((q) => q.task_statement === ts);
   if (noDup) { const drop = new Set(DUPLICATE_PAIRS.map((p) => Math.max(...p))); qs = qs.filter((q) => !drop.has(q.num)); }
   let nums = qs.map((q) => q.num);
   switch (mode) {

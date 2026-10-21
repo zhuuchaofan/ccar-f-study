@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useStudy } from './useStudy';
 import { DOMAIN_ZH } from './meta';
-export default function QuestionList({ items }: { items: { num: number; domain: number; excerpt: string }[] }) {
+export default function QuestionList({ items }: { items: { num: number; domain: number; excerpt: string; ts: string | null }[] }) {
   const { data } = useStudy();
   const [d, setD] = useState(0); const [f, setF] = useState<'all' | 'wrong' | 'new'>('all');
   const prog = new Map((data?.progress ?? []).map((p) => [p.question_num, p]));
@@ -18,7 +18,7 @@ export default function QuestionList({ items }: { items: { num: number; domain: 
       <ul className="space-y-2">{rows.map((i) => { const p = prog.get(i.num); return (
         <li key={i.num}><Link className="card flex gap-3 p-3" href={`/practice/run?mode=seq&num=${i.num}`}>
           <b className="w-10 shrink-0">#{i.num}</b><span className="min-w-0 flex-1 text-sm">…{i.excerpt}</span>
-          <span className="tag shrink-0">{!p ? '新' : p.streak_wrong > 0 ? '错' : '对'}</span></Link></li>); })}</ul>
+          {i.ts && <span className="tag hidden shrink-0 sm:inline-block">{i.ts}</span>}<span className="tag shrink-0">{!p ? '新' : p.streak_wrong > 0 ? '错' : '对'}</span></Link></li>); })}</ul>
     </div>
   );
 }

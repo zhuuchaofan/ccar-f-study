@@ -18,6 +18,7 @@ export function getDb(): Database.Database {
   CREATE TABLE IF NOT EXISTS progress(user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, question_num INTEGER NOT NULL, attempts INTEGER NOT NULL, correct INTEGER NOT NULL, streak_wrong INTEGER NOT NULL, box INTEGER NOT NULL, last_at INTEGER, due_at INTEGER, PRIMARY KEY(user_id, question_num));
   CREATE TABLE IF NOT EXISTS bookmarks(user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, question_num INTEGER NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY(user_id, question_num));
   CREATE TABLE IF NOT EXISTS lesson_progress(user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, ts_id TEXT NOT NULL, status TEXT NOT NULL, updated_at INTEGER NOT NULL, PRIMARY KEY(user_id, ts_id));
+  CREATE TABLE IF NOT EXISTS exams(id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, nums TEXT NOT NULL, started_at INTEGER NOT NULL, submitted_at INTEGER, result TEXT);
   CREATE TABLE IF NOT EXISTS settings(user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, json TEXT NOT NULL);
   `);
   return db;

@@ -18,7 +18,7 @@ export default function Dashboard() {
   const totalAtt = progress.reduce((s, p) => s + p.attempts, 0), totalOk = progress.reduce((s, p) => s + p.correct, 0);
   const due = progress.filter((p) => p.due_at !== null && p.due_at <= now).length;
   const mistakes = progress.filter((p) => p.streak_wrong > 0).length;
-  const last = attempts[0];
+  const last = attempts.find((a) => a.mode !== 'exam');
   const byDomain: Record<number, { a: number; c: number }> = {};
   for (const p of progress) { const d = CATEGORY_TO_DOMAIN_JS[p.question_num]; if (!d) continue; (byDomain[d] ??= { a: 0, c: 0 }); byDomain[d].a += p.attempts; byDomain[d].c += p.correct; }
   const weak = Object.entries(byDomain).filter(([, v]) => v.a >= 3).sort((x, y) => x[1].c / x[1].a - y[1].c / y[1].a)[0];
@@ -29,7 +29,8 @@ export default function Dashboard() {
     mistakes > 0 && { href: '/practice/run?mode=mistakes', title: `重做错题 ${mistakes} 道`, sub: '最近一次答错的题' },
     answered < 152 && { href: '/practice/run?mode=unanswered&limit=10', title: '做 10 道新题', sub: `还有 ${152 - answered} 道没做过` },
     weak && { href: `/practice/run?mode=seq&domain=${weak[0]}`, title: `薄弱领域：${DOMAIN_ZH[Number(weak[0])]}`, sub: `正确率 ${Math.round((weak[1].c / weak[1].a) * 100)}%` },
-    nextLesson && { href: `/syllabus/${nextLesson}`, title: `学习 Task Statement ${nextLesson}`, sub: '大纲知识点' },
+    nextLesson && { href: `/syllabus/${nextLesson}`, title: `学习 Task Statement ${nextLesson}`, sub: '课程讲解与实操练习' },
+    answered >= 30 && { href: '/exam', title: '做一次模拟考试', sub: '60 题 · 120 分钟' },
   ].filter(Boolean) as { href: string; title: string; sub: string }[];
   return (
     <div className="space-y-6">
