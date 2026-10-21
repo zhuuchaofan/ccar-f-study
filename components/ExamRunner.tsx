@@ -2,25 +2,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { DOMAIN_ZH } from './meta';
+import { LangTabs, useLang, type Lang } from './lang';
+import { Loading } from './ui';
 
-type Lang = 'en' | 'zh' | 'ja';
 type PQ = { num: number; domain: number; stem: string; options: { label: string; text: string }[]; multi: boolean; i18n: Partial<Record<'zh' | 'ja', { stem: string; options: Record<string, string> }>> };
 type Item = { num: number; selected: string[]; answer: string[]; correct: boolean; domain: number };
 type Expl = { en: string } & Partial<Record<'zh' | 'ja', { explanation: string; takeaway: string }>>;
 type Exam = { id: number; started_at: number; submitted_at: number | null; deadline: number; now: number; questions: PQ[]; result: null | { correct: number; total: number; by_domain: Record<string, { correct: number; total: number }>; items: Item[]; explanations: Record<string, Expl> } };
-const LANGS = [['zh', '中文'], ['ja', '日本語'], ['en', 'English']] as const;
 const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0);
 const fmt = (ms: number) => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 3600)}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
 const store = { get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} }, del: (k: string) => { try { localStorage.removeItem(k); } catch {} } };
 
-function useLang() {
-  const [lang, setL] = useState<Lang>('zh');
-  useEffect(() => { const l = store.get('quiz-lang'); if (l === 'en' || l === 'zh' || l === 'ja') setL(l); }, []);
-  return [lang, (l: Lang) => { setL(l); store.set('quiz-lang', l); }] as const;
-}
-function LangTabs({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
-  return <div role="tablist" aria-label="语言" className="flex gap-2">{LANGS.map(([k, n]) => <button key={k} role="tab" aria-selected={lang === k} className={`btn ${lang === k ? 'btn-primary' : ''}`} onClick={() => setLang(k)}>{n}</button>)}</div>;
-}
 const text = (q: PQ, lang: Lang) => { const t = lang !== 'en' ? q.i18n?.[lang] : undefined; return { stem: t?.stem ?? q.stem, opt: (l: string, en: string) => t?.options[l] ?? en, lang: t ? lang : 'en' }; };
 
 export default function ExamRunner({ id }: { id: string }) {
@@ -61,7 +53,7 @@ export default function ExamRunner({ id }: { id: string }) {
   }, [exam, submit]);
 
   if (err && !exam) return <div className="card p-6"><p>{err}</p><Link className="btn mt-4" href="/exam">返回</Link></div>;
-  if (!exam) return <p className="muted">加载中…</p>;
+  if (!exam) return <Loading />;
   if (exam.result) return <ExamResult exam={exam} lang={lang} setLang={setLang} />;
 
   const q = exam.questions[idx]; const t = text(q, lang); const sel = answers[q.num] ?? [];

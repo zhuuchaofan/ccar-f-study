@@ -1,11 +1,12 @@
 'use client';
 import Link from 'next/link';
 import { useStudy } from './useStudy';
+import { Loading } from './ui';
 import { CATEGORY_TO_DOMAIN_JS, DOMAIN_ZH, TS_IDS } from './meta';
 
 export default function Dashboard() {
   const { data, state } = useStudy();
-  if (state === 'loading') return <p className="muted">加载中…</p>;
+  if (state === 'loading') return <Loading />;
   if (state === 'anon' || !data) return (
     <section className="card p-6">
       <h1 className="t-title">CCAR-F 学习平台</h1>
