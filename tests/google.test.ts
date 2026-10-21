@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 process.env.CCAR_DB = ':memory:';
 import { sqliteRepo as repo } from '@/core/repo-sqlite';
-import { googleLogin as login, verifyPassword } from '@/core/auth';
-const googleLogin = (email: string, invite?: string) => login(email, invite, repo);
+import { setRepo } from '@/core/repo';
+import { googleLogin, verifyPassword } from '@/core/auth';
+setRepo(repo);
 
 describe('google login policy', () => {
   const tag = `g${Date.now()}`;

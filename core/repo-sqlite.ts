@@ -1,5 +1,6 @@
 import { getDb } from './db';
-import { nextProgress, type Repo } from './repo';
+import type { Repo } from './repo';
+import { nextProgress } from './srs';
 import type { Progress } from './srs';
 
 const id = (s: string) => Number(s);
