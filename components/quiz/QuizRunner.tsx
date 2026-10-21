@@ -47,7 +47,7 @@ export default function QuizRunner() {
   const bookmark = useCallback(async () => {
     if (!q) return; const on = !marks.has(q.num);
     await setBookmark(q.num, on);
-    setMarks((m) => { const n = new Set(m); on ? n.add(q.num) : n.delete(q.num); return n; });
+    setMarks((m) => { const n = new Set(m); if (on) n.add(q.num); else n.delete(q.num); return n; });
   }, [q, marks]);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function QuizRunner() {
       if (!q) return;
       const i = '1234567'.indexOf(e.key);
       if (i >= 0 && i < q.options.length) { toggle(q.options[i].label); }
-      else if (e.key === 'Enter') { e.preventDefault(); res ? next() : submit(); }
+      else if (e.key === 'Enter') { e.preventDefault(); if (res) next(); else submit(); }
       else if (e.key.toLowerCase() === 'b') bookmark();
     };
     window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey);

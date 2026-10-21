@@ -45,7 +45,9 @@ export const firestoreRepo: Repo = {
   async deleteSession(tokenHash) { await fs().collection('sessions').doc(tokenHash).delete(); },
   async sessionUser(tokenHash, now) {
     const s = await fs().collection('sessions').doc(tokenHash).get();
-    return s.exists && s.get('expires_at') > now ? { id: s.get('uid'), email: s.get('email') } : null;
+    if (!s.exists) return null;
+    if (s.get('expires_at') <= now) { await s.ref.delete(); return null; } // expired sessions are removed when next seen
+    return { id: s.get('uid'), email: s.get('email') };
   },
   async recordAttempt(userId, num, selected, isCorrect, ms, mode, now = Date.now()) {
     const pref = user(userId).collection('progress').doc(String(num));

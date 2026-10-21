@@ -12,5 +12,29 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - run: npx tsc --noEmit
+      - run: npm run lint
       - run: npx vitest run
       - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with: { name: playwright-report, path: test-results, retention-days: 7 }
+
+  # The production storage path: repo contract tests and the e2e suite against the Firestore emulator.
+  firestore:
+    runs-on: ubuntu-latest
+    env:
+      FIRESTORE_EMULATOR_HOST: 127.0.0.1:8085
+      FIRESTORE_PROJECT_ID: demo-ccar
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Contract tests and e2e on the emulator
+        run: npx -y firebase-tools@14 emulators:exec --only firestore --project demo-ccar "npx vitest run tests/repo.test.ts && STORAGE=firestore npx playwright test"

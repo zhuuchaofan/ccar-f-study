@@ -12,6 +12,7 @@ export interface Repo {
   findUser(email: string): Promise<{ id: string; pw_hash: string } | null>;
   createSession(tokenHash: string, userId: string, expiresAt: number): Promise<void>;
   deleteSession(tokenHash: string): Promise<void>;
+  /** Null if missing or expired; an expired session is deleted. */
   sessionUser(tokenHash: string, now: number): Promise<SessionUser | null>;
   recordAttempt(userId: string, num: number, selected: string[], isCorrect: boolean, ms: number | null, mode: string | null, now?: number): Promise<Progress>;
   getProgress(userId: string): Promise<ProgressRow[]>;
