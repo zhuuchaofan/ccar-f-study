@@ -1,6 +1,8 @@
 # Cloud Run image: Next.js standalone server, Firestore storage.
 FROM node:22-bookworm-slim AS build
 WORKDIR /app
+# better-sqlite3 is an optionalDependency (local dev only). It needs Python and a C++ compiler to build, which this image
+# does not have, so npm skips it here; production uses Firestore and never loads it.
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
