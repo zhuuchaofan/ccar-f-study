@@ -60,7 +60,7 @@ test('language tabs show AI translation drafts with the English original availab
   await register(page, email());
   await page.goto('/practice/run?mode=seq');
   await page.getByRole('tab', { name: '中文' }).click();
-  await expect(page.getByTestId('stem')).toContainText('CLAUDE.md');
+  await expect(page.getByTestId('stem')).toContainText('持续集成');
   await expect(page.getByText('AI 翻译草稿').first()).toBeVisible();
   await page.getByRole('tab', { name: '日本語' }).click();
   await expect(page.getByTestId('stem')).toContainText('パイプライン');
