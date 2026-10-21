@@ -36,7 +36,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <section className="card p-6">
-        <p className="muted text-sm">继续学习</p>
+        <p className="muted text-sm">继续学习 · 已做 {answered} / 152 题</p><div className="bar mt-2" role="img" aria-label={`已做 ${answered} / 152 题`}><i style={{ width: `${Math.round((answered / 152) * 100)}%` }} /></div>
         <h1 className="mt-1 t-title">{last ? `上次做到第 ${last.question_num} 题` : '从第 1 题开始'}</h1>
         <Link href={resumeHref} className="btn btn-primary mt-4">{last ? '继续' : '开始'}</Link>
       </section>

@@ -25,7 +25,7 @@ body{font-family:ui-sans-serif,system-ui,-apple-system,"Hiragino Sans","Noto San
 .tag{display:inline-block;font-size:.75rem;padding:.1rem .5rem;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
 .tag-warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
 .bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}.bar>i{display:block;height:100%;background:var(--accent)}
-input.field{width:100%;padding:.65rem .8rem;border-radius:var(--r-ctl);border:1px solid var(--line);background:var(--surface);color:var(--ink);min-height:44px}
+.field{width:100%;padding:.65rem .8rem;border-radius:var(--r-ctl);border:1px solid var(--line);background:var(--surface);color:var(--ink);min-height:44px}
 .code-inline{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;padding:.05rem .35rem;border-radius:6px;background:var(--line);overflow-wrap:anywhere}
 .code-block{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem;line-height:1.55;padding:.9rem 1rem;border-radius:12px;background:var(--surface);border:1px solid var(--line);overflow-x:auto;white-space:pre}
 .tip{border-left:4px solid var(--accent);background:var(--warn-bg);padding:.6rem .9rem;border-radius:0 10px 10px 0}
