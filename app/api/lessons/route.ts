@@ -7,5 +7,5 @@ export async function POST(req: Request) {
   if (!isJson(req)) return json({ error: 'bad_request' }, 400);
   const p = z.object({ ts: z.string(), status: z.enum(['not_started', 'learning', 'done']) }).safeParse(await req.json().catch(() => null));
   if (!p.success || !getTaskStatement(p.data.ts)) return json({ error: 'invalid' }, 400);
-  repo.setLessonStatus(u.id, p.data.ts, p.data.status); return json({ ok: true });
+  await repo.setLessonStatus(u.id, p.data.ts, p.data.status); return json({ ok: true });
 }

@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+e2e
+tests
+test-results
+playwright-report
+data/*.db*
+*.tsbuildinfo
+docs

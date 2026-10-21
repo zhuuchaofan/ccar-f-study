@@ -1,25 +1,55 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 process.env.CCAR_DB = ':memory:';
-import { createUser, checkLogin, hashPassword, verifyPassword } from '@/core/auth';
-import { repo } from '@/core/repo';
-describe('auth', () => {
-  it('hashes and verifies passwords', () => { const h = hashPassword('correct horse'); expect(verifyPassword('correct horse', h)).toBe(true); expect(verifyPassword('wrong', h)).toBe(false); expect(h).not.toContain('correct'); });
-  it('registers once per email (case-insensitive) and checks login', () => {
-    const id = createUser('A@x.com', 'password1'); expect(id).toBeTruthy(); expect(createUser('a@x.com', 'password2')).toBeNull();
-    expect(checkLogin('a@X.com', 'password1')).toBe(id); expect(checkLogin('a@x.com', 'nope')).toBeNull(); expect(checkLogin('zz@x.com', 'password1')).toBeNull();
-  });
+import { hashPassword, verifyPassword } from '@/core/auth';
+import type { Repo } from '@/core/repo';
+import { sqliteRepo } from '@/core/repo-sqlite';
+import { grade } from '@/core/exam';
+import { getQuestion } from '@/core/content';
+
+describe('passwords', () => {
+  it('hashes and verifies', () => { const h = hashPassword('correct horse'); expect(verifyPassword('correct horse', h)).toBe(true); expect(verifyPassword('wrong', h)).toBe(false); expect(h).not.toContain('correct'); });
 });
-describe('repo persistence', () => {
-  let uid = 0, other = 0;
-  beforeAll(() => { uid = createUser('u1@x.com', 'password1')!; other = createUser('u2@x.com', 'password1')!; });
-  it('records attempts and keeps per-question progress', () => {
-    repo.recordAttempt(uid, 5, ['A'], false, 1000, 'seq', 1000);
-    repo.recordAttempt(uid, 5, ['B'], true, 900, 'seq', 2000);
-    const p = repo.getProgress(uid).find((x) => x.question_num === 5)!;
-    expect(p.attempts).toBe(2); expect(p.correct).toBe(1); expect(p.streak_wrong).toBe(0); expect(p.box).toBe(2);
-    expect(repo.getAttempts(uid).map((a) => a.is_correct)).toEqual([true, false]);
+
+/** One contract, run against every storage backend. Firestore runs only when FIRESTORE_EMULATOR_HOST is set. */
+const backends: [string, () => Promise<Repo>][] = [['sqlite', async () => sqliteRepo]];
+if (process.env.FIRESTORE_EMULATOR_HOST) backends.push(['firestore', async () => (await import('@/core/repo-firestore')).firestoreRepo]);
+
+for (const [name, load] of backends) describe(`repo contract: ${name}`, () => {
+  let repo: Repo; let uid = '', other = '';
+  const tag = `${name}${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+  beforeAll(async () => {
+    repo = await load();
+    uid = (await repo.createUser(`a-${tag}@x.com`, hashPassword('password1')))!; other = (await repo.createUser(`b-${tag}@x.com`, hashPassword('password1')))!;
   });
-  it('isolates users', () => { expect(repo.getProgress(other)).toEqual([]); expect(repo.getAttempts(other)).toEqual([]); });
-  it('bookmarks toggle idempotently', () => { repo.setBookmark(uid, 9, true); repo.setBookmark(uid, 9, true); expect(repo.getBookmarks(uid)).toEqual([9]); repo.setBookmark(uid, 9, false); expect(repo.getBookmarks(uid)).toEqual([]); });
-  it('lesson status upserts', () => { repo.setLessonStatus(uid, '1.1', 'learning'); repo.setLessonStatus(uid, '1.1', 'done'); expect(repo.getLessonStatus(uid)).toEqual({ '1.1': 'done' }); });
+  it('users: unique email, lookup', async () => {
+    expect(uid).toBeTruthy(); expect(await repo.createUser(`a-${tag}@x.com`, 'h')).toBeNull();
+    expect((await repo.findUser(`a-${tag}@x.com`))!.id).toBe(uid); expect(await repo.findUser(`zz-${tag}@x.com`)).toBeNull();
+  });
+  it('sessions: create, expire, delete', async () => {
+    await repo.createSession(`t1-${tag}`, uid, 5000);
+    expect(await repo.sessionUser(`t1-${tag}`, 1000)).toEqual({ id: uid, email: `a-${tag}@x.com` });
+    expect(await repo.sessionUser(`t1-${tag}`, 6000)).toBeNull();
+    await repo.deleteSession(`t1-${tag}`); expect(await repo.sessionUser(`t1-${tag}`, 1000)).toBeNull();
+  });
+  it('records attempts and keeps per-question progress', async () => {
+    await repo.recordAttempt(uid, 5, ['A'], false, 1000, 'seq', 1000);
+    await repo.recordAttempt(uid, 5, ['B'], true, 900, 'seq', 2000);
+    const p = (await repo.getProgress(uid)).find((x) => x.question_num === 5)!;
+    expect(p.attempts).toBe(2); expect(p.correct).toBe(1); expect(p.streak_wrong).toBe(0); expect(p.box).toBe(2);
+    expect((await repo.getAttempts(uid)).map((a) => [a.is_correct, a.selected])).toEqual([[true, ['B']], [false, ['A']]]);
+  });
+  it('isolates users', async () => { expect(await repo.getProgress(other)).toEqual([]); expect(await repo.getAttempts(other)).toEqual([]); expect(await repo.listExams(other)).toEqual([]); });
+  it('bookmarks toggle idempotently', async () => {
+    await repo.setBookmark(uid, 9, true); await repo.setBookmark(uid, 9, true); expect(await repo.getBookmarks(uid)).toEqual([9]);
+    await repo.setBookmark(uid, 9, false); expect(await repo.getBookmarks(uid)).toEqual([]);
+  });
+  it('lesson status upserts', async () => { await repo.setLessonStatus(uid, '1.1', 'learning'); await repo.setLessonStatus(uid, '1.1', 'done'); expect(await repo.getLessonStatus(uid)).toEqual({ '1.1': 'done' }); });
+  it('exams: create, owner-only read, submit once', async () => {
+    const id = await repo.createExam(uid, [1, 2, 3], 100);
+    expect(await repo.getExam(other, id)).toBeNull();
+    const r = grade([1, 2, 3], { '1': getQuestion(1)!.answer });
+    expect(await repo.submitExam(uid, id, r, 200)).toBe(true); expect(await repo.submitExam(uid, id, r, 300)).toBe(false);
+    const e = (await repo.getExam(uid, id))!; expect(e.nums).toEqual([1, 2, 3]); expect(e.submitted_at).toBe(200); expect(e.result!.correct).toBe(1);
+    expect((await repo.listExams(uid)).map((x) => x.id)).toEqual([id]);
+  });
 });

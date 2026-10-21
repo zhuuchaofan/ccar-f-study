@@ -1,0 +1,48 @@
+name: Deploy Cloud Run
+
+# Manual only: nothing is deployed until someone runs this workflow from the Actions tab.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: ${{ vars.GCP_REGION || 'asia-east1' }}
+  SERVICE: ${{ vars.CLOUD_RUN_SERVICE || 'ccar-f-study' }}
+  RUNTIME_SA: ${{ vars.CLOUD_RUN_SERVICE_ACCOUNT }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx vitest run
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check configuration
+        run: |
+          for n in PROJECT_ID RUNTIME_SA; do
+            [[ -n "${!n}" ]] || { echo "::error::Missing repository variable for ${n} (see docs/deploy-cloud-run.md)"; exit 1; }
+          done
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Deploy
+        run: |
+          gcloud run deploy "$SERVICE" --project="$PROJECT_ID" --region="$REGION" --source . \
+            --service-account="$RUNTIME_SA" --allow-unauthenticated --port=8080 \
+            --cpu=1 --memory=512Mi --concurrency=40 --min-instances=0 --max-instances=2 \
+            --set-env-vars="STORAGE=firestore,FIRESTORE_PROJECT_ID=${PROJECT_ID}" \
+            --set-secrets="INVITE_CODE=ccar-invite-code:latest"
