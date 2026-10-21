@@ -29,6 +29,7 @@ Cloud Run 不保存本地文件，所以线上必须用 Firestore（`STORAGE=fir
 ## 说明
 
 - **费用**：`min-instances=0`，没人访问时不收计算费用；Firestore 个人用量一般在免费额度内。
+- **线上不装 SQLite**：`better-sqlite3` 是可选依赖，只在本地开发用。Docker 构建里没有 Python 和编译器，npm 会跳过它，线上走 Firestore 用不到它。所以这个镜像不能用 `STORAGE=sqlite` 运行。
 - **最多 2 个实例**：登录失败限速目前放在内存里，实例多了限速会不准，所以限制了实例数。
 - **Firestore 数据结构**：见 `core/repo-firestore.ts` 顶部注释。只用单字段索引，不需要额外建索引。
 - **本地试 Firestore**：`firebase emulators:start --only firestore`，然后
