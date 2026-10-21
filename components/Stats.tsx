@@ -1,11 +1,12 @@
 'use client';
-import Link from 'next/link';
+import { useEffect } from 'react';
 import { useStudy } from './useStudy';
+import { Empty, Loading, loginHref } from './ui';
 import { CATEGORY_TO_DOMAIN_JS, DOMAIN_ZH } from './meta';
 export default function Stats() {
   const { data, state } = useStudy();
-  if (state === 'loading') return <p className="muted">加载中…</p>;
-  if (state === 'anon' || !data) return <p>请先 <Link className="underline" href="/login">登录</Link>。</p>;
+  useEffect(() => { if (state === 'anon') location.replace(loginHref('/stats')); }, [state]);
+  if (state !== 'ready' || !data) return <Loading />;
   const rows = [1, 2, 3, 4, 5].map((d) => {
     const ps = data.progress.filter((p) => CATEGORY_TO_DOMAIN_JS[p.question_num] === d);
     const a = ps.reduce((s, p) => s + p.attempts, 0), c = ps.reduce((s, p) => s + p.correct, 0);
@@ -16,6 +17,7 @@ export default function Stats() {
   const day = (t: number) => new Date(t).toLocaleDateString('sv');
   const perDay: Record<string, number> = {}; for (const a of data.attempts) perDay[day(a.created_at)] = (perDay[day(a.created_at)] ?? 0) + 1;
   const days = Array.from({ length: 28 }, (_, i) => day(Date.now() - (27 - i) * 86400000));
+  if (data.progress.length === 0) return <Empty title="还没有学习记录" href="/practice" cta="去做第一道题">做几道题之后，这里会显示各领域的正确率、掌握度和学习日历。</Empty>;
   return (
     <div className="space-y-8">
       <h1 className="t-title">学习统计</h1>

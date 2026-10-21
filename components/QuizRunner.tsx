@@ -3,11 +3,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { DOMAIN_ZH } from './meta';
+import { LangTabs, useLang } from './lang';
+import { Loading, Notice, loginHref } from './ui';
 
-type Lang = 'en' | 'zh' | 'ja';
 type PQ = { num: number; category: string; domain: number; stem: string; options: { label: string; text: string }[]; multi: boolean; source_type: string; source_name: string; duplicate_of: number | null; i18n: Partial<Record<'zh' | 'ja', { stem: string; options: Record<string, string> }>> };
 type Res = { correct: boolean; answer: string[]; explanation_en: string; i18n: Partial<Record<'zh' | 'ja', { explanation: string; takeaway: string }>>; task_statement: { id: string; title_zh: string } | null; source: { pdf_pages: number[]; review_status: string }; progress: { mastery: number; box: number } };
-const LANGS = [['en', 'English'], ['zh', '中文'], ['ja', '日本語']] as const;
 
 export default function QuizRunner() {
   const sp = useSearchParams();
@@ -19,14 +19,12 @@ export default function QuizRunner() {
   const [sel, setSel] = useState<string[]>([]);
   const [res, setRes] = useState<Res | null>(null);
   const [marks, setMarks] = useState<Set<number>>(new Set());
-  const [lang, setLangState] = useState<Lang>('zh');
-  useEffect(() => { try { const l = localStorage.getItem('quiz-lang'); if (l === 'en' || l === 'zh' || l === 'ja') setLangState(l); } catch {} }, []);
-  const setLang = (l: Lang) => { setLangState(l); try { localStorage.setItem('quiz-lang', l); } catch {} };
+  const [lang, setLang] = useLang();
   const [err, setErr] = useState('');
   const t0 = useRef(Date.now());
 
   useEffect(() => {
-    fetch(`/api/practice/queue?${qs}`).then(async (r) => { if (r.status === 401) { location.href = '/login'; return; } const d = await r.json(); setNums(d.nums); setIdx(0); });
+    fetch(`/api/practice/queue?${qs}`).then(async (r) => { if (r.status === 401) { location.href = loginHref('/practice'); return; } const d = await r.json(); setNums(d.nums); setIdx(0); });
     fetch('/api/bookmarks').then((r) => r.ok ? r.json() : { nums: [] }).then((d) => setMarks(new Set(d.nums)));
   }, [qs]);
   const cur = nums?.[idx];
@@ -62,10 +60,10 @@ export default function QuizRunner() {
     window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey);
   }, [q, res, toggle, submit, next, bookmark]);
 
-  if (nums === null) return <p className="muted">加载中…</p>;
+  if (nums === null) return <Loading />;
   if (nums.length === 0) return <div className="card p-6"><p>这个模式下没有题目。</p><Link className="btn mt-4" href="/practice">返回练习</Link></div>;
   if (idx >= nums.length) return <div className="card p-6"><h1 className="text-xl font-bold">本轮完成</h1><p className="muted mt-1">共 {nums.length} 题。</p><div className="mt-4 flex gap-2"><Link className="btn btn-primary" href="/stats">看统计</Link><Link className="btn" href="/practice">再练一组</Link></div></div>;
-  if (!q) return <p className="muted">加载中…</p>;
+  if (!q) return <Loading />;
 
   const tq = lang !== 'en' ? q.i18n?.[lang] : undefined;
   const te = lang !== 'en' ? res?.i18n?.[lang] : undefined;
@@ -74,11 +72,11 @@ export default function QuizRunner() {
     <article className="space-y-4 pb-20">
       <div className="flex items-center gap-2 text-sm">
         <span className="muted shrink-0">{idx + 1} / {nums.length}</span><span className="tag shrink-0">领域 {q.domain}</span>
-        <div role="tablist" aria-label="语言" className="seg ml-auto">{LANGS.map(([k, n]) => <button key={k} role="tab" aria-selected={lang === k} onClick={() => setLang(k)}>{n}</button>)}</div>
+        <LangTabs lang={lang} setLang={setLang} className="ml-auto" />
         <button className="btn !min-h-10 !px-3" onClick={bookmark} aria-pressed={marks.has(q.num)} aria-label={marks.has(q.num) ? '取消收藏' : '收藏'}>{marks.has(q.num) ? '★' : '☆'}</button>
       </div>
       <p className="muted text-xs">第 {q.num} 题 · {DOMAIN_ZH[q.domain]} · 第三方题库，未审核{tq ? ' · AI 翻译草稿，以英文为准' : ''}{q.duplicate_of ? ` · 疑似与第 ${q.duplicate_of} 题重复` : ''}</p>
-      {lang !== 'en' && !tq && <p className="card p-3 text-sm" style={{ background: 'var(--warn-bg)', color: 'var(--warn)' }}>这道题的{lang === 'zh' ? '中文' : '日文'}译文尚未生成，当前显示英文原文。</p>}
+      {lang !== 'en' && !tq && <Notice>这道题的{lang === 'zh' ? '中文' : '日文'}译文尚未生成，当前显示英文原文。</Notice>}
       <p className="card whitespace-pre-line p-4 leading-relaxed" lang={tq ? lang : 'en'} data-testid="stem">{tq?.stem ?? q.stem}</p>
       {tq && <details className="text-sm"><summary className="muted cursor-pointer">查看英文原文</summary><div className="card mt-2 space-y-1 p-3" lang="en"><p className="whitespace-pre-line">{q.stem}</p>{q.options.map((o) => <p key={o.label}><b>{o.label}.</b> {o.text}</p>)}</div></details>}
       <div role={q.multi ? 'group' : 'radiogroup'} aria-label="选项" className="space-y-2">

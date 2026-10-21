@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
 import NavUser from '@/components/NavUser';
+import NavLinks from '@/components/NavLinks';
 
 export const metadata: Metadata = { title: 'CCAR-F 学习平台', description: 'Claude Certified Architect – Foundations 中日英三语学习（私人学习用途）' };
 export const viewport: Viewport = { width: 'device-width', initialScale: 1 };
@@ -17,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <span className="order-2 ml-auto sm:order-3"><NavUser /></span>
             {/* phones: brand and account controls on the first row, section links on their own row below */}
             <div className="order-3 flex w-full gap-5 sm:order-2 sm:w-auto [&>a]:py-2">
-              <Link href="/practice">练习</Link><Link href="/syllabus">课程</Link><Link href="/exam">模考</Link><Link href="/questions">题库</Link><Link href="/stats">统计</Link>
+              <NavLinks />
             </div>
           </nav>
         </header>

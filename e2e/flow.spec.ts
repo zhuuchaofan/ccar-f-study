@@ -88,3 +88,17 @@ test('lesson pages render the lesson and linked questions', async ({ page }) => 
   await expect(page.getByTestId('lesson')).toContainText('这一条考什么');
   await expect(page.getByText(/对应题目（\d+）/)).toBeVisible();
 });
+
+test('login-required pages send anonymous users to login and back', async ({ page }) => {
+  await page.goto('/stats'); await page.waitForURL(/\/login\?next=%2Fstats/);
+  await page.getByRole('button', { name: '没有账号？注册' }).click();
+  await page.getByLabel('邮箱').fill(email()); await page.getByLabel(/密码/).fill('password123');
+  await page.getByRole('button', { name: '创建账号' }).click(); await page.waitForURL('/stats');
+  await expect(page.getByText('还没有学习记录')).toBeVisible();
+  await expect(page.getByRole('link', { name: '统计' })).toHaveAttribute('aria-current', 'page');
+});
+test('login next only accepts same-site paths', async ({ page }) => {
+  await page.goto('/login?next=//evil.example'); await page.getByRole('button', { name: '没有账号？注册' }).click();
+  await page.getByLabel('邮箱').fill(email()); await page.getByLabel(/密码/).fill('password123');
+  await page.getByRole('button', { name: '创建账号' }).click(); await page.waitForURL('/');
+});

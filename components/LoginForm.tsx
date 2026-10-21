@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 type GoogleId = { initialize(o: { client_id: string; callback: (r: { credential: string }) => void }): void; renderButton(el: HTMLElement, o: Record<string, unknown>): void };
 declare global { interface Window { google?: { accounts: { id: GoogleId } } } }
 
-export default function LoginForm({ inviteRequired, googleClientId }: { inviteRequired: boolean; googleClientId: string }) {
+export default function LoginForm({ inviteRequired, googleClientId, next }: { inviteRequired: boolean; googleClientId: string; next: string }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [invite, setInvite] = useState('');
   const [err, setErr] = useState(''); const [busy, setBusy] = useState(false);
@@ -12,7 +12,7 @@ export default function LoginForm({ inviteRequired, googleClientId }: { inviteRe
     e.preventDefault(); setBusy(true); setErr('');
     const r = await fetch(`/api/auth/${mode}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(mode === 'register' ? { email, password, invite } : { email, password }) });
     const d = await r.json().catch(() => ({}));
-    if (r.ok) location.href = '/'; else { setErr(d.error || '失败'); setBusy(false); }
+    if (r.ok) location.href = next; else { setErr(d.error || '失败'); setBusy(false); }
   }
   // Google sign-in: a new account needs the invite code, so the credential waits until it is entered.
   const [pending, setPending] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export default function LoginForm({ inviteRequired, googleClientId }: { inviteRe
     setBusy(true); setErr('');
     const r = await fetch('/api/auth/google', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ credential, invite: code }) });
     const d = await r.json().catch(() => ({}));
-    if (r.ok) { location.href = '/'; return; }
+    if (r.ok) { location.href = next; return; }
     setBusy(false);
     if (d.error === 'invite_required') { setPending(credential); setErr('这是新账号，请输入邀请码后继续'); } else setErr(d.error || '失败');
   }
