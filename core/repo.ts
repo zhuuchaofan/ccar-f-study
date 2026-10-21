@@ -1,4 +1,4 @@
-import { applyAttempt, emptyProgress, isDue, mastery, type Progress } from './srs';
+import type { Progress } from './srs';
 import type { ExamResult } from './exam';
 
 export type AttemptRow = { question_num: number; selected: string[]; is_correct: boolean; created_at: number; mode: string | null };
@@ -27,17 +27,18 @@ export interface Repo {
   submitExam(userId: string, id: string, result: ExamResult, now?: number): Promise<boolean>;
 }
 
-/** Shared by both implementations so progress math stays identical. */
-export const nextProgress = (prev: Progress | undefined, isCorrect: boolean, now: number) => applyAttempt(prev ?? emptyProgress(), isCorrect, now);
+const METHODS = ['createUser', 'findUser', 'createSession', 'deleteSession', 'sessionUser', 'recordAttempt', 'getProgress', 'getAttempts', 'getBookmarks', 'setBookmark', 'getLessonStatus', 'setLessonStatus', 'createExam', 'getExam', 'listExams', 'submitExam'] as const satisfies readonly (keyof Repo)[];
 
-let impl: Repo | null = null;
-function getRepo(): Repo {
-  if (impl) return impl;
-  if ((process.env.STORAGE || 'sqlite') === 'firestore') impl = require('./repo-firestore').firestoreRepo as Repo;
-  else impl = require('./repo-sqlite').sqliteRepo as Repo;
-  return impl;
+export type StorageKind = 'sqlite' | 'firestore';
+/** Loads one backend. Dynamic imports keep the Firestore client and better-sqlite3 (absent in production) out of the other path. */
+export async function createRepo(kind: StorageKind): Promise<Repo> {
+  return kind === 'firestore' ? (await import('./repo-firestore')).firestoreRepo : (await import('./repo-sqlite')).sqliteRepo;
 }
-/** Lazily bound so the Firestore client is only loaded when it is configured. */
-export const repo: Repo = new Proxy({} as Repo, { get: (_, k) => (getRepo() as any)[k] });
+let current: Promise<Repo> | null = null;
+/** The app's repo, chosen once from STORAGE=sqlite|firestore. */
+export const getRepo = () => (current ??= createRepo(process.env.STORAGE === 'firestore' ? 'firestore' : 'sqlite'));
+/** Tests (or scripts) can swap the backend. */
+export const setRepo = (r: Repo) => { current = Promise.resolve(r); };
+/** Forwards every call to getRepo(), so modules can import `repo` without knowing which backend is configured. */
+export const repo = Object.fromEntries(METHODS.map((k) => [k, async (...args: unknown[]) => ((await getRepo())[k] as (...a: unknown[]) => unknown)(...args)])) as unknown as Repo;
 
-export { isDue, mastery };

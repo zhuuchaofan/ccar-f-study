@@ -1,5 +1,6 @@
 import { Firestore } from '@google-cloud/firestore';
-import { nextProgress, type ExamRow, type Repo } from './repo';
+import type { ExamRow, Repo } from './repo';
+import { nextProgress } from './srs';
 import type { Progress } from './srs';
 
 /**

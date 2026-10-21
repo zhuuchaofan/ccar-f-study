@@ -19,3 +19,5 @@ export function mastery(p: Progress): number {
 /** Progress row as sent to the client: adds the 0..100 mastery estimate. */
 export const withMastery = <T extends Progress>(p: T) => ({ ...p, mastery: mastery(p) });
 export const isDue = (p: Progress, now: number) => p.attempts > 0 && p.due_at !== null && p.due_at <= now;
+/** Shared by both storage backends so progress math stays identical. */
+export const nextProgress = (prev: Progress | undefined, isCorrect: boolean, now: number) => applyAttempt(prev ?? emptyProgress(), isCorrect, now);

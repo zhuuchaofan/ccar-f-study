@@ -1,6 +1,5 @@
 import { z } from 'zod';
-import { googleLogin, startSession, throttled, noteFailure } from '@/core/auth';
-import { verifyGoogleToken } from '@/core/google';
+import { googleLogin, startSession, throttled, noteFailure, verifyGoogleToken } from '@/core/auth';
 import { json, isJson } from '@/core/http';
 const Body = z.object({ credential: z.string().min(20).max(5000), invite: z.string().max(200).optional() });
 export async function POST(req: Request) {
