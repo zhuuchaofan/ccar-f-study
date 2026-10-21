@@ -12,10 +12,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head>
       <body>
         <header className="border-b" style={{ borderColor: 'var(--line)' }}>
-          <nav className="mx-auto flex max-w-4xl flex-wrap items-center gap-x-5 gap-y-1 px-4 py-3 text-sm" aria-label="主导航">
-            <Link href="/" className="font-bold" style={{ color: 'var(--accent)' }}>CCAR-F</Link>
-            <Link href="/practice">练习</Link><Link href="/syllabus">课程</Link><Link href="/exam">模考</Link><Link href="/questions">题库</Link><Link href="/stats">统计</Link>
-            <span className="ml-auto"><NavUser /></span>
+          <nav className="mx-auto flex max-w-4xl flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2 text-sm" aria-label="主导航">
+            <Link href="/" className="order-1 py-2 font-bold" style={{ color: 'var(--accent)' }}>CCAR-F</Link>
+            <span className="order-2 ml-auto sm:order-3"><NavUser /></span>
+            {/* phones: brand and account controls on the first row, section links on their own row below */}
+            <div className="order-3 flex w-full gap-5 sm:order-2 sm:w-auto [&>a]:py-2">
+              <Link href="/practice">练习</Link><Link href="/syllabus">课程</Link><Link href="/exam">模考</Link><Link href="/questions">题库</Link><Link href="/stats">统计</Link>
+            </div>
           </nav>
         </header>
         <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
