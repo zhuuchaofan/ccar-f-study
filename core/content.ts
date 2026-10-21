@@ -25,7 +25,7 @@ export const CATEGORY_TO_DOMAIN: Record<string, number> = {
   'Context Management and Reliability': 5,
 };
 export const DOMAIN_WEIGHTS: Record<number, number> = { 1: 27, 2: 18, 3: 20, 4: 20, 5: 15 };
-export const DUPLICATE_PAIRS: [number, number][] = [[2, 8], [27, 129], [54, 149], [55, 105]];
+export const DUPLICATE_PAIRS: [number, number][] = [[2, 8], [27, 129], [54, 149], [55, 105], [1, 49], [41, 48], [56, 67]];
 
 let cache: { questions: Question[]; domains: Domain[] } | null = null;
 function load() {

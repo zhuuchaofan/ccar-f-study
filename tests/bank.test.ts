@@ -18,7 +18,7 @@ describe('question bank integrity', () => {
   });
   it('every question has a PDF page reference and third-party source label', () => { for (const q of qs) { expect(q.pdf_pages[0]).toBeGreaterThan(0); expect(q.source_type).toBe('third_party_bank'); } });
   it('public payload never leaks answer or explanation', () => { for (const q of qs) { const keys = Object.keys(publicQuestion(q)); expect(keys).not.toContain('answer'); expect(keys).not.toContain('explanation_en'); expect(JSON.stringify(publicQuestion(q))).not.toContain('"answer"'); } });
-  it('flags the four known duplicate pairs', () => { expect(DUPLICATE_PAIRS).toEqual([[2, 8], [27, 129], [54, 149], [55, 105]]); expect(publicQuestion(qs[7]).duplicate_of).toBe(2); });
+  it('flags the known duplicate pairs', () => { expect(DUPLICATE_PAIRS).toEqual([[2, 8], [27, 129], [54, 149], [55, 105], [1, 49], [41, 48], [56, 67]]); expect(publicQuestion(qs[7]).duplicate_of).toBe(2); });
 });
 describe('syllabus', () => {
   const ds = getDomains();

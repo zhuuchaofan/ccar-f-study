@@ -20,7 +20,7 @@ npm run e2e       # Playwright 端到端（桌面 + 手机视口）
 ```
 
 ## 数据
-- `data/questions_en.json`：第三方题库（examsvce v3.1）。来源类型 `third_party_bank`，状态 `extracted_unreviewed`。第 78 题原文只有 3 个选项，按原样保留。疑似重复：2≈8、27≈129、54≈149、55≈105。
+- `data/questions_en.json`：第三方题库（examsvce v3.1）。来源类型 `third_party_bank`，状态 `extracted_unreviewed`。第 78 题原文只有 3 个选项，按原样保留。疑似重复：2≈8、27≈129、54≈149、55≈105，翻译时又发现 1≈49、41≈48、56≈67（选项顺序不同）。
 - `data/syllabus_ja.json`：官方考试指南（日文 v1.0）大纲。中文标题在 `content/ts_zh.json`，为 AI 翻译草稿。
 - `content/q/*.json`：题目的中日翻译、解析、要点和 Task Statement 归类（AI 草稿）。`python3 -I tools/check_q.py` 校验完整性。
 - `content/lessons/<id>.md`：课程讲解（AI 草稿），由 `components/Markdown.tsx` 渲染（只支持一个小的 Markdown 子集）。
