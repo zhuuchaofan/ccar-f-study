@@ -19,7 +19,8 @@ npm run build && CCAR_DB=./data/app.db npm start   # http://localhost:3000
 npm test          # 单元测试（题库完整性、复习算法、认证、持久化）
 npm run e2e       # Playwright 端到端（桌面 + 手机视口）
 npm run lint      # ESLint
-npm run gen:meta  # 改了题库或 content/manifest.json 后重新生成 components/meta.ts
+npm run validate  # 按导入格式校验 content/exams/ 下的所有考试
+npm run gen:meta  # 改了题库或 manifest.json 后重新生成 components/meta.ts
 # Firestore 路径：npx firebase-tools emulators:exec --only firestore --project demo-ccar "STORAGE=firestore npx playwright test"
 #   （需设 FIRESTORE_EMULATOR_HOST=127.0.0.1:8085 FIRESTORE_PROJECT_ID=demo-ccar）
 ```
@@ -28,10 +29,10 @@ npm run gen:meta  # 改了题库或 content/manifest.json 后重新生成 compon
 见 [docs/deploy-cloud-run.md](docs/deploy-cloud-run.md)：Cloud Run + Firestore，注册需要邀请码（环境变量 `INVITE_CODE`，不设则开放注册，仅限本地开发）。
 
 ## 数据
-- `data/questions_en.json`：第三方题库（examsvce v3.1）。来源类型 `third_party_bank`，状态 `extracted_unreviewed`。第 78 题原文只有 3 个选项，按原样保留。疑似重复：2≈8、27≈129、54≈149、55≈105，翻译时又发现 1≈49、41≈48、56≈67（选项顺序不同）。
-- `data/syllabus_ja.json`：官方考试指南（日文 v1.0）大纲。中文标题在 `content/ts_zh.json`，为 AI 翻译草稿。
-- `content/q/*.json`：题目的中日翻译、解析、要点和 Task Statement 归类（AI 草稿）。`python3 -I tools/check_q.py` 校验完整性。
-- `content/lessons/<id>.md`：课程讲解（AI 草稿），由 `components/Markdown.tsx` 渲染（只支持一个小的 Markdown 子集）。
+- `content/exams/ccar-f/questions.json`：第三方题库（examsvce v3.1）。来源类型 `third_party_bank`，状态 `extracted_unreviewed`。第 78 题原文只有 3 个选项，按原样保留。疑似重复：2≈8、27≈129、54≈149、55≈105，翻译时又发现 1≈49、41≈48、56≈67（选项顺序不同）。
+- `content/exams/ccar-f/syllabus.json`：官方考试指南（日文 v1.0）大纲。中文标题在 `content/exams/ccar-f/ts_zh.json`，为 AI 翻译草稿。
+- `content/exams/ccar-f/q/*.json`：题目的中日翻译、解析、要点和 Task Statement 归类（AI 草稿）。`python3 -I tools/check_q.py` 校验完整性。
+- `content/exams/ccar-f/lessons/<id>.md`：课程讲解（AI 草稿），由 `components/ui/Markdown.tsx` 渲染（只支持一个小的 Markdown 子集）。
 - `tools/*.py`：从 PDF 提取（过滤红色 KaiTi 水印字体）的脚本，记录提取方法。
 - 用户数据（账号、作答、进度、收藏）在 SQLite；数据访问集中在 `core/repo.ts` 的 `Repo` 接口，线上用 `core/repo-firestore.ts`（`STORAGE=firestore`）。
 
@@ -39,3 +40,7 @@ npm run gen:meta  # 改了题库或 content/manifest.json 后重新生成 compon
 - 题库来自第三方，仅限私人学习。仓库目前是公开的（所有者的选择）。
 - 练习正确率不是官方 720 分制成绩。
 - 题库自带解析引用的 Anthropic 文档出处尚未逐条核实。
+
+## 新考试
+
+见 [docs/new-exam.md](docs/new-exam.md)：导入格式、`npm run import:exam` 和部署时的 `EXAM_ID`。

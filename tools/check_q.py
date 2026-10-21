@@ -1,11 +1,11 @@
-"""Validate content/q/*.json translation batches. Usage: python3 -I tools/check_q.py [first last]"""
+"""Validate content/exams/<id>/q/*.json translation batches. Usage: EXAM_ID=ccar-f python3 -I tools/check_q.py [first last]"""
 import json, os, sys, re
-root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-bank = {q['num']: q for q in json.load(open(os.path.join(root, 'data/questions_en.json')))}
-ts_ids = {t['id'] for d in json.load(open(os.path.join(root, 'data/syllabus_ja.json'))) for t in d['task_statements']}
+root = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'content', 'exams', os.environ.get('EXAM_ID', 'ccar-f'))
+bank = {q['num']: q for q in json.load(open(os.path.join(root, 'questions.json')))}
+ts_ids = {t['id'] for d in json.load(open(os.path.join(root, 'syllabus.json'))) for t in d['task_statements']}
 dom = {'Agentic Architecture and Orchestration': '1', 'Tool Design and MCP Integration': '2', 'Claude Code Configuration and Workflows': '3', 'Prompt Engineering and Structured Output': '4', 'Context Management and Reliability': '5'}
 seen, errs = {}, []
-d = os.path.join(root, 'content/q')
+d = os.path.join(root, 'q')
 for f in sorted(os.listdir(d)):
     if not f.endswith('.json'): continue
     try: data = json.load(open(os.path.join(d, f)))

@@ -9,7 +9,9 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "gen:meta": "tsx scripts/gen-meta.ts",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "validate": "tsx scripts/validate-content.ts",
+    "import:exam": "tsx scripts/import-exam.ts"
   },
   "dependencies": {
     "@google-cloud/firestore": "^7.11.6",
