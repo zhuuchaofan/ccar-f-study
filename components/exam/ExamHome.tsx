@@ -1,12 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { loginHref } from './ui';
-type Row = { id: number; started_at: number; submitted_at: number | null; total: number; correct: number | null };
+import { loginHref } from '../ui/ui';
+import { isAnon, listExamsApi, startExamApi, type ExamList } from '@/lib/api';
+type Row = ExamList['exams'][number];
 export default function ExamHome() {
   const [rows, setRows] = useState<Row[] | null>(null); const [anon, setAnon] = useState(false); const [busy, setBusy] = useState(false);
-  useEffect(() => { fetch('/api/exam').then(async (r) => { if (r.status === 401) { setAnon(true); return; } setRows((await r.json()).exams); }); }, []);
-  const start = async () => { setBusy(true); const r = await fetch('/api/exam', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' }); if (r.ok) location.href = `/exam/${(await r.json()).id}`; else setBusy(false); };
+  useEffect(() => { listExamsApi().then((d) => setRows(d.exams)).catch((e) => { if (isAnon(e)) setAnon(true); }); }, []);
+  const start = async () => { setBusy(true); const r = await startExamApi().catch(() => null); if (r) location.href = `/exam/${r.id}`; else setBusy(false); };
   const open = rows?.find((r) => !r.submitted_at && Date.now() - r.started_at < 120 * 60000);
   return (
     <div className="space-y-6">

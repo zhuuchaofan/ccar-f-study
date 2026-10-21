@@ -60,8 +60,10 @@ export const firestoreRepo: Repo = {
   async getProgress(userId) {
     return (await user(userId).collection('progress').get()).docs.map((d) => ({ question_num: d.get('question_num'), ...pickProgress(d.data()) }));
   },
-  async getAttempts(userId, limit = 500) {
-    const s = await user(userId).collection('attempts').orderBy('created_at', 'desc').limit(limit).get();
+  async getAttempts(userId, limit = 500, since = 0) {
+    let q = user(userId).collection('attempts').orderBy('created_at', 'desc');
+    if (since) q = q.where('created_at', '>=', since);
+    const s = await q.limit(limit).get();
     return s.docs.map((d) => ({ question_num: d.get('question_num'), selected: d.get('selected'), is_correct: d.get('is_correct'), created_at: d.get('created_at'), mode: d.get('mode') ?? null }));
   },
   async getBookmarks(userId) {

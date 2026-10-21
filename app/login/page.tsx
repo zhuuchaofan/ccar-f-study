@@ -1,4 +1,4 @@
-import LoginForm from '@/components/LoginForm';
+import LoginForm from '@/components/auth/LoginForm';
 import { googleClientId, inviteRequired } from '@/core/auth';
 export const dynamic = 'force-dynamic';
 /** Only same-site paths: a login link must not become an open redirect. */

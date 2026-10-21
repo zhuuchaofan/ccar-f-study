@@ -27,8 +27,17 @@ export async function practiceQueue(userId: string, p: QueueParams) {
   const [progress, bookmarks] = await Promise.all([repo.getProgress(userId), repo.getBookmarks(userId)]);
   return buildQueue(p, { questions: getQuestions(), progress: new Map(progress.map((x) => [x.question_num, x])), bookmarks: new Set(bookmarks), now: Date.now() });
 }
-/** Everything the dashboard and stats pages need. */
+export const CALENDAR_DAYS = 28;
+/**
+ * Everything the dashboard and stats pages need. Reads only the attempts the pages show (the calendar window,
+ * plus the latest 100 to find the last practice question past the most recent 60-question exam) instead of 2000.
+ */
 export async function studySummary(userId: string) {
-  const [progress, attempts, lessons] = await Promise.all([repo.getProgress(userId), repo.getAttempts(userId, 2000), repo.getLessonStatus(userId)]);
-  return { progress: progress.map(withMastery), attempts, lessons, now: Date.now() };
+  const now = Date.now();
+  const [progress, attempts, recent, lessons] = await Promise.all([
+    repo.getProgress(userId), repo.getAttempts(userId, 2000, now - (CALENDAR_DAYS + 1) * 86400000), repo.getAttempts(userId, 100), repo.getLessonStatus(userId),
+  ]);
+  const last = recent.find((a) => a.mode !== 'exam');
+  return { progress: progress.map(withMastery), attempts, last_practice: last ? last.question_num : null, lessons, now };
 }
+export type StudySummary = Awaited<ReturnType<typeof studySummary>>;

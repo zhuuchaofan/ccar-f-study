@@ -2,12 +2,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { DOMAIN_ZH } from './meta';
-import { LangTabs, useLang } from './lang';
-import { Loading, Notice, loginHref } from './ui';
+import { DOMAIN_ZH } from '../meta';
+import { LangTabs, useLang } from '../ui/lang';
+import { Loading, Notice, loginHref } from '../ui/ui';
+import { getBookmarks, getQuestion, getQueue, isAnon, postAttempt, setBookmark, type AttemptResult, type PublicQuestion } from '@/lib/api';
+import { invalidateStudy } from '../study/useStudy';
 
-type PQ = { num: number; category: string; domain: number; stem: string; options: { label: string; text: string }[]; multi: boolean; source_type: string; source_name: string; duplicate_of: number | null; i18n: Partial<Record<'zh' | 'ja', { stem: string; options: Record<string, string> }>> };
-type Res = { correct: boolean; answer: string[]; explanation_en: string; i18n: Partial<Record<'zh' | 'ja', { explanation: string; takeaway: string }>>; task_statement: { id: string; title_zh: string } | null; source: { pdf_pages: number[]; review_status: string }; progress: { mastery: number; box: number } };
+type PQ = PublicQuestion;
+type Res = AttemptResult;
 
 export default function QuizRunner() {
   const sp = useSearchParams();
@@ -24,27 +26,27 @@ export default function QuizRunner() {
   const t0 = useRef(Date.now());
 
   useEffect(() => {
-    fetch(`/api/practice/queue?${qs}`).then(async (r) => { if (r.status === 401) { location.href = loginHref('/practice'); return; } const d = await r.json(); setNums(d.nums); setIdx(0); });
-    fetch('/api/bookmarks').then((r) => r.ok ? r.json() : { nums: [] }).then((d) => setMarks(new Set(d.nums)));
+    getQueue(qs).then((d) => { setNums(d.nums); setIdx(0); }).catch((e) => { if (isAnon(e)) location.href = loginHref('/practice'); });
+    getBookmarks().then((d) => setMarks(new Set(d.nums))).catch(() => {});
   }, [qs]);
   const cur = nums?.[idx];
   useEffect(() => {
     if (cur == null) { setQ(null); return; }
     setQ(null); setSel([]); setRes(null); setErr('');
-    fetch(`/api/questions/${cur}`).then((r) => r.json()).then((d) => { setQ(d); t0.current = Date.now(); });
+    getQuestion(cur).then((d) => { setQ(d); t0.current = Date.now(); });
   }, [cur]);
 
   const toggle = useCallback((l: string) => { if (res || !q) return; setSel((s) => q.multi ? (s.includes(l) ? s.filter((x) => x !== l) : [...s, l]) : [l]); }, [res, q]);
   const submit = useCallback(async () => {
     if (!q || res || sel.length === 0) return;
-    const r = await fetch('/api/attempts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ num: q.num, selected: sel, ms: Date.now() - t0.current, mode }) });
-    if (!r.ok) { setErr('提交失败，请重试'); return; }
-    setRes(await r.json());
+    const r = await postAttempt({ num: q.num, selected: sel, ms: Date.now() - t0.current, mode }).catch(() => null);
+    if (!r) { setErr('提交失败，请重试'); return; }
+    invalidateStudy(); setRes(r);
   }, [q, res, sel, mode]);
   const next = useCallback(() => { if (nums && idx + 1 < nums.length) setIdx(idx + 1); else setIdx(nums ? nums.length : 0); }, [nums, idx]);
   const bookmark = useCallback(async () => {
     if (!q) return; const on = !marks.has(q.num);
-    await fetch('/api/bookmarks', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ num: q.num, on }) });
+    await setBookmark(q.num, on);
     setMarks((m) => { const n = new Set(m); on ? n.add(q.num) : n.delete(q.num); return n; });
   }, [q, marks]);
 

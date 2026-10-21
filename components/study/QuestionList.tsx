@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useStudy } from './useStudy';
-import { DOMAIN_ZH } from './meta';
+import { DOMAIN_ZH } from '../meta';
 export default function QuestionList({ items }: { items: { num: number; domain: number; excerpt: string; ts: string | null }[] }) {
   const { data } = useStudy();
   const [d, setD] = useState(0); const [f, setF] = useState<'all' | 'wrong' | 'new'>('all'); const [kw, setKw] = useState('');

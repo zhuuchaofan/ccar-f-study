@@ -1,8 +1,8 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
-import NavUser from '@/components/NavUser';
-import NavLinks from '@/components/NavLinks';
+import NavUser from '@/components/layout/NavUser';
+import NavLinks from '@/components/layout/NavLinks';
 
 export const metadata: Metadata = { title: 'CCAR-F 学习平台', description: 'Claude Certified Architect – Foundations 中日英三语学习（私人学习用途）' };
 export const viewport: Viewport = { width: 'device-width', initialScale: 1 };

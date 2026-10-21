@@ -1,14 +1,14 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { DOMAIN_ZH } from './meta';
-import { LangTabs, useLang, type Lang } from './lang';
-import { Loading } from './ui';
+import { DOMAIN_ZH } from '../meta';
+import { LangTabs, useLang, type Lang } from '../ui/lang';
+import { Loading, loginHref } from '../ui/ui';
+import { ApiFailure, getExamApi, submitExamApi, type ExamView } from '@/lib/api';
+import { invalidateStudy } from '../study/useStudy';
 
-type PQ = { num: number; domain: number; stem: string; options: { label: string; text: string }[]; multi: boolean; i18n: Partial<Record<'zh' | 'ja', { stem: string; options: Record<string, string> }>> };
-type Item = { num: number; selected: string[]; answer: string[]; correct: boolean; domain: number };
-type Expl = { en: string } & Partial<Record<'zh' | 'ja', { explanation: string; takeaway: string }>>;
-type Exam = { id: number; started_at: number; submitted_at: number | null; deadline: number; now: number; questions: PQ[]; result: null | { correct: number; total: number; by_domain: Record<string, { correct: number; total: number }>; items: Item[]; explanations: Record<string, Expl> } };
+type Exam = ExamView;
+type PQ = Exam['questions'][number];
 const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0);
 const fmt = (ms: number) => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 3600)}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
 const store = { get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} }, del: (k: string) => { try { localStorage.removeItem(k); } catch {} } };
@@ -29,21 +29,19 @@ export default function ExamRunner({ id }: { id: string }) {
   const key = `exam-${id}`;
 
   useEffect(() => {
-    fetch(`/api/exam/${id}`).then(async (r) => {
-      if (r.status === 401) { location.href = '/login'; return; }
-      if (!r.ok) { setErr('找不到这场考试。'); return; }
-      const d: Exam = await r.json(); skew.current = d.now - Date.now(); setExam(d);
+    getExamApi(id).then((d) => {
+      skew.current = d.now - Date.now(); setExam(d);
       const saved = store.get(key); if (saved && !d.result) { try { const s = JSON.parse(saved); setAnswers(s.answers || {}); setFlags(new Set(s.flags || [])); } catch {} }
-    });
+    }).catch((e) => { if (e instanceof ApiFailure && e.status === 401) location.href = loginHref(`/exam/${id}`); else setErr('找不到这场考试。'); });
   }, [id, key]);
   useEffect(() => { if (exam && !exam.result) store.set(key, JSON.stringify({ answers, flags: [...flags] })); }, [answers, flags, exam, key]);
 
   const submit = useCallback(async () => {
     if (busy) return; setBusy(true);
-    const r = await fetch(`/api/exam/${id}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ answers }) });
+    // 409: already submitted (e.g. in another tab), so just show the stored result
+    const d = await submitExamApi(id, answers).catch((e) => (e instanceof ApiFailure && e.status === 409 ? getExamApi(id) : null));
     setBusy(false);
-    if (r.ok || r.status === 409) { store.del(key); const d = r.ok ? await r.json() : await (await fetch(`/api/exam/${id}`)).json(); setExam(d); window.scrollTo(0, 0); }
-    else setErr('交卷失败，请重试');
+    if (d) { store.del(key); invalidateStudy(); setExam(d); window.scrollTo(0, 0); } else setErr('交卷失败，请重试');
   }, [answers, id, key, busy]);
 
   useEffect(() => {
