@@ -29,6 +29,7 @@ for (const [name, load] of backends) describe(`repo contract: ${name}`, () => {
     await repo.createSession(`t1-${tag}`, uid, 5000);
     expect(await repo.sessionUser(`t1-${tag}`, 1000)).toEqual({ id: uid, email: `a-${tag}@x.com` });
     expect(await repo.sessionUser(`t1-${tag}`, 6000)).toBeNull();
+    expect(await repo.sessionUser(`t1-${tag}`, 1000)).toBeNull(); // deleted once seen expired
     await repo.deleteSession(`t1-${tag}`); expect(await repo.sessionUser(`t1-${tag}`, 1000)).toBeNull();
   });
   it('records attempts and keeps per-question progress', async () => {

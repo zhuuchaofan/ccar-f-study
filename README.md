@@ -18,6 +18,10 @@ npm install
 npm run build && CCAR_DB=./data/app.db npm start   # http://localhost:3000
 npm test          # 单元测试（题库完整性、复习算法、认证、持久化）
 npm run e2e       # Playwright 端到端（桌面 + 手机视口）
+npm run lint      # ESLint
+npm run gen:meta  # 改了题库或 content/manifest.json 后重新生成 components/meta.ts
+# Firestore 路径：npx firebase-tools emulators:exec --only firestore --project demo-ccar "STORAGE=firestore npx playwright test"
+#   （需设 FIRESTORE_EMULATOR_HOST=127.0.0.1:8085 FIRESTORE_PROJECT_ID=demo-ccar）
 ```
 
 ## 部署

@@ -16,6 +16,7 @@ export const sqliteRepo: Repo = {
   async createSession(tokenHash, userId, expiresAt) { getDb().prepare('INSERT INTO sessions(token_hash,user_id,expires_at) VALUES(?,?,?)').run(tokenHash, id(userId), expiresAt); },
   async deleteSession(tokenHash) { getDb().prepare('DELETE FROM sessions WHERE token_hash=?').run(tokenHash); },
   async sessionUser(tokenHash, now) {
+    getDb().prepare('DELETE FROM sessions WHERE token_hash=? AND expires_at<=?').run(tokenHash, now); // expired sessions are removed when next seen
     const r = getDb().prepare('SELECT u.id,u.email FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>?').get(tokenHash, now) as { id: number; email: string } | undefined;
     return r ? { id: String(r.id), email: r.email } : null;
   },

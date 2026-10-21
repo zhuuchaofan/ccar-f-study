@@ -39,7 +39,7 @@ Cloud Run 不保存本地文件，所以线上必须用 Firestore（`STORAGE=fir
 ## 用 GitHub Actions 部署（可选）
 
 `.github/workflows/deploy-cloud-run.yml` 只能在 GitHub 的 Actions 页面手动点运行，不会因为合并代码自动部署。需要先配 Workload Identity Federation，并在仓库 Settings → Variables 里设置：
-`GCP_PROJECT_ID`、`WIF_PROVIDER`、`GCP_DEPLOY_SERVICE_ACCOUNT`、`CLOUD_RUN_SERVICE_ACCOUNT`（可选：`GCP_REGION`、`CLOUD_RUN_SERVICE`）。如果只是自己用，直接用第 4 步的脚本更省事。
+`GCP_PROJECT_ID`、`WIF_PROVIDER`、`GCP_DEPLOY_SERVICE_ACCOUNT`、`CLOUD_RUN_SERVICE_ACCOUNT`（可选：`GCP_REGION`、`CLOUD_RUN_SERVICE`、`GOOGLE_CLIENT_ID`）。工作流和第 4 步的脚本用的是同一份部署参数（`SKIP_SETUP=1` 跳过开 API 和权限设置）。如果只是自己用，直接用第 4 步的脚本更省事。
 
 ## 说明
 

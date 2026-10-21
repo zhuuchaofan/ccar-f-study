@@ -40,9 +40,8 @@ jobs:
           service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
       - uses: google-github-actions/setup-gcloud@v2
       - name: Deploy
-        run: |
-          gcloud run deploy "$SERVICE" --project="$PROJECT_ID" --region="$REGION" --source . \
-            --service-account="$RUNTIME_SA" --allow-unauthenticated --port=8080 \
-            --cpu=1 --memory=512Mi --concurrency=40 --min-instances=0 --max-instances=2 \
-            --set-env-vars="STORAGE=firestore,FIRESTORE_PROJECT_ID=${PROJECT_ID}${{ vars.GOOGLE_CLIENT_ID && format(',GOOGLE_CLIENT_ID={0}', vars.GOOGLE_CLIENT_ID) || '' }}" \
-            --set-secrets="INVITE_CODE=ccar-invite-code:latest"
+        # Same flags as a manual deploy; SKIP_SETUP leaves APIs, IAM and secrets alone (set up once by hand).
+        env:
+          SKIP_SETUP: '1'
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+        run: bash scripts/deploy-cloud-run.sh

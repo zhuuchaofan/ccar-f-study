@@ -57,7 +57,7 @@ export default function ExamRunner({ id }: { id: string }) {
   const q = exam.questions[idx]; const t = text(q, lang); const sel = answers[q.num] ?? [];
   const answered = exam.questions.filter((x) => (answers[x.num] ?? []).length).length;
   const choose = (l: string) => setAnswers((a) => ({ ...a, [q.num]: q.multi ? (sel.includes(l) ? sel.filter((x) => x !== l) : [...sel, l]) : [l] }));
-  const flag = () => setFlags((f) => { const n = new Set(f); n.has(q.num) ? n.delete(q.num) : n.add(q.num); return n; });
+  const flag = () => setFlags((f) => { const n = new Set(f); if (n.has(q.num)) n.delete(q.num); else n.add(q.num); return n; });
   return (
     <article className="space-y-4">
       <div className="card sticky top-0 z-10 flex flex-wrap items-center gap-3 p-3 text-sm">
