@@ -1,0 +1,26 @@
+import './globals.css';
+import type { Metadata, Viewport } from 'next';
+import Link from 'next/link';
+import NavUser from '@/components/NavUser';
+
+export const metadata: Metadata = { title: 'CCAR-F 学习平台', description: 'Claude Certified Architect – Foundations 中日英三语学习（私人学习用途）' };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1 };
+const themeScript = `try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}`;
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="zh-CN" suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head>
+      <body>
+        <header className="border-b" style={{ borderColor: 'var(--line)' }}>
+          <nav className="mx-auto flex max-w-4xl flex-wrap items-center gap-x-5 gap-y-1 px-4 py-3 text-sm" aria-label="主导航">
+            <Link href="/" className="font-bold" style={{ color: 'var(--accent)' }}>CCAR-F</Link>
+            <Link href="/practice">练习</Link><Link href="/syllabus">课程</Link><Link href="/questions">题库</Link><Link href="/stats">统计</Link>
+            <span className="ml-auto"><NavUser /></span>
+          </nav>
+        </header>
+        <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
+        <footer className="mx-auto max-w-4xl px-4 pb-10 text-xs muted">私人学习用途。题库来自第三方，未经审核，不代表官方考试内容；练习正确率不是官方 720 分制成绩。</footer>
+      </body>
+    </html>
+  );
+}
