@@ -13,7 +13,9 @@ RUNTIME_SA="${RUNTIME_SA:-${RUNTIME_SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.c
 INVITE_SECRET="${INVITE_SECRET:-ccar-invite-code}"
 # Optional: OAuth web client ID enables "Continue with Google" (not a secret). See docs/deploy-cloud-run.md.
 GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-}"
-ENV_VARS="STORAGE=firestore,FIRESTORE_PROJECT_ID=${PROJECT_ID}${GOOGLE_CLIENT_ID:+,GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}}"
+# Optional: EXAM_ID picks content/exams/<id>/ (default ccar-f). See docs/new-exam.md.
+EXAM_ID="${EXAM_ID:-}"
+ENV_VARS="STORAGE=firestore,FIRESTORE_PROJECT_ID=${PROJECT_ID}${GOOGLE_CLIENT_ID:+,GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}}${EXAM_ID:+,EXAM_ID=${EXAM_ID}}"
 
 gcloud config set project "$PROJECT_ID" >/dev/null
 

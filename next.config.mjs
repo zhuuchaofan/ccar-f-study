@@ -6,7 +6,7 @@ export default {
   serverExternalPackages: ['better-sqlite3', '@google-cloud/firestore'],
   output: 'standalone',
   // question bank and lessons are read from disk at runtime; make sure the standalone trace ships them
-  outputFileTracingIncludes: { '/**': ['./data/questions_en.json', './data/syllabus_ja.json', './content/**/*'] },
+  outputFileTracingIncludes: { '/**': ['./content/**/*'] },
   poweredByHeader: false,
   webpack: (config, { isServer }) => {
     config.resolve.alias['@'] = root;

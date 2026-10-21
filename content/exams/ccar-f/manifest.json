@@ -1,0 +1,70 @@
+{
+  "_note": "Bank-wide facts for this exam. Format: docs/new-exam.md. components/meta.ts is generated from it: npm run gen:meta",
+  "id": "ccar-f",
+  "title": "Claude Certified Architect – Foundations",
+  "source_language": "en",
+  "syllabus_language": "ja",
+  "question_count": 152,
+  "domains": [
+    {
+      "id": 1,
+      "category": "Agentic Architecture and Orchestration",
+      "weight": 27,
+      "short_zh": "Agent 架构与编排"
+    },
+    {
+      "id": 2,
+      "category": "Tool Design and MCP Integration",
+      "weight": 18,
+      "short_zh": "工具设计与 MCP"
+    },
+    {
+      "id": 3,
+      "category": "Claude Code Configuration and Workflows",
+      "weight": 20,
+      "short_zh": "Claude Code 配置与工作流"
+    },
+    {
+      "id": 4,
+      "category": "Prompt Engineering and Structured Output",
+      "weight": 20,
+      "short_zh": "提示工程与结构化输出"
+    },
+    {
+      "id": 5,
+      "category": "Context Management and Reliability",
+      "weight": 15,
+      "short_zh": "上下文管理与可靠性"
+    }
+  ],
+  "duplicate_pairs": [
+    [
+      2,
+      8
+    ],
+    [
+      27,
+      129
+    ],
+    [
+      54,
+      149
+    ],
+    [
+      55,
+      105
+    ],
+    [
+      1,
+      49
+    ],
+    [
+      41,
+      48
+    ],
+    [
+      56,
+      67
+    ]
+  ]
+}
