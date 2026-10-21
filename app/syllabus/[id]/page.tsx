@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getDomains, getLesson, getTaskStatement, questionsForTs } from '@/core/content';
-import LessonStatus from '@/components/LessonStatus';
-import Markdown from '@/components/Markdown';
+import LessonStatus from '@/components/study/LessonStatus';
+import Markdown from '@/components/ui/Markdown';
 import { DOMAIN_ZH } from '@/components/meta';
 export function generateStaticParams() { return getDomains().flatMap((d) => d.task_statements.map((t) => ({ id: t.id }))); }
 export default async function TS({ params }: { params: Promise<{ id: string }> }) {

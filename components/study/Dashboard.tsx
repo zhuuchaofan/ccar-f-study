@@ -1,8 +1,8 @@
 'use client';
 import Link from 'next/link';
 import { useStudy } from './useStudy';
-import { Loading } from './ui';
-import { CATEGORY_TO_DOMAIN_JS, DOMAIN_ZH, QUESTION_COUNT, TS_IDS } from './meta';
+import { Loading } from '../ui/ui';
+import { CATEGORY_TO_DOMAIN_JS, DOMAIN_ZH, QUESTION_COUNT, TS_IDS } from '../meta';
 
 export default function Dashboard() {
   const { data, state } = useStudy();
@@ -14,17 +14,16 @@ export default function Dashboard() {
       <div className="mt-5 flex gap-3"><Link className="btn btn-primary" href="/login">登录 / 注册</Link><Link className="btn" href="/syllabus">先看课程大纲</Link></div>
     </section>
   );
-  const { progress, attempts, now, lessons } = data;
+  const { progress, now, lessons, last_practice } = data;
   const answered = progress.length;
   const totalAtt = progress.reduce((s, p) => s + p.attempts, 0), totalOk = progress.reduce((s, p) => s + p.correct, 0);
   const due = progress.filter((p) => p.due_at !== null && p.due_at <= now).length;
   const mistakes = progress.filter((p) => p.streak_wrong > 0).length;
-  const last = attempts.find((a) => a.mode !== 'exam');
   const byDomain: Record<number, { a: number; c: number }> = {};
   for (const p of progress) { const d = CATEGORY_TO_DOMAIN_JS[p.question_num]; if (!d) continue; (byDomain[d] ??= { a: 0, c: 0 }); byDomain[d].a += p.attempts; byDomain[d].c += p.correct; }
   const weak = Object.entries(byDomain).filter(([, v]) => v.a >= 3).sort((x, y) => x[1].c / x[1].a - y[1].c / y[1].a)[0];
   const nextLesson = TS_IDS.find((id) => lessons[id] !== 'done');
-  const resumeHref = last ? `/practice/run?mode=seq&start=${Math.min(QUESTION_COUNT, last.question_num + 1)}` : '/practice/run?mode=seq';
+  const resumeHref = last_practice ? `/practice/run?mode=seq&start=${Math.min(QUESTION_COUNT, last_practice + 1)}` : '/practice/run?mode=seq';
   const tasks = [
     due > 0 && { href: '/practice/run?mode=due', title: `复习到期题 ${due} 道`, sub: '间隔重复：现在复习记得最牢' },
     mistakes > 0 && { href: '/practice/run?mode=mistakes', title: `重做错题 ${mistakes} 道`, sub: '最近一次答错的题' },
@@ -37,8 +36,8 @@ export default function Dashboard() {
     <div className="space-y-6">
       <section className="card p-6">
         <p className="muted text-sm">继续学习 · 已做 {answered} / {QUESTION_COUNT} 题</p><div className="bar mt-2" role="img" aria-label={`已做 ${answered} / ${QUESTION_COUNT} 题`}><i style={{ width: `${Math.round((answered / QUESTION_COUNT) * 100)}%` }} /></div>
-        <h1 className="mt-1 t-title">{last ? `上次做到第 ${last.question_num} 题` : '从第 1 题开始'}</h1>
-        <Link href={resumeHref} className="btn btn-primary mt-4">{last ? '继续' : '开始'}</Link>
+        <h1 className="mt-1 t-title">{last_practice ? `上次做到第 ${last_practice} 题` : '从第 1 题开始'}</h1>
+        <Link href={resumeHref} className="btn btn-primary mt-4">{last_practice ? '继续' : '开始'}</Link>
       </section>
       <section>
         <h2 className="mb-3 t-h2">今天学什么</h2>

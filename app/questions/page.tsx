@@ -1,5 +1,5 @@
 import { getQuestions, domainOf } from '@/core/content';
-import QuestionList from '@/components/QuestionList';
+import QuestionList from '@/components/study/QuestionList';
 import { currentUser } from '@/core/auth';
 import { redirect } from 'next/navigation';
 export const dynamic = 'force-dynamic';

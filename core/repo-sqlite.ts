@@ -35,8 +35,8 @@ export const sqliteRepo: Repo = {
   async getProgress(userId) {
     return getDb().prepare('SELECT question_num,attempts,correct,streak_wrong,box,last_at,due_at FROM progress WHERE user_id=?').all(id(userId)) as any[];
   },
-  async getAttempts(userId, limit = 500) {
-    const rows = getDb().prepare('SELECT question_num,selected,is_correct,created_at,mode FROM attempts WHERE user_id=? ORDER BY created_at DESC, id DESC LIMIT ?').all(id(userId), limit) as any[];
+  async getAttempts(userId, limit = 500, since = 0) {
+    const rows = getDb().prepare('SELECT question_num,selected,is_correct,created_at,mode FROM attempts WHERE user_id=? AND created_at>=? ORDER BY created_at DESC, id DESC LIMIT ?').all(id(userId), since, limit) as any[];
     return rows.map((r) => ({ ...r, selected: JSON.parse(r.selected), is_correct: !!r.is_correct }));
   },
   async getBookmarks(userId) {

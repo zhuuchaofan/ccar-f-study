@@ -37,6 +37,8 @@ for (const [name, load] of backends) describe(`repo contract: ${name}`, () => {
     const p = (await repo.getProgress(uid)).find((x) => x.question_num === 5)!;
     expect(p.attempts).toBe(2); expect(p.correct).toBe(1); expect(p.streak_wrong).toBe(0); expect(p.box).toBe(2);
     expect((await repo.getAttempts(uid)).map((a) => [a.is_correct, a.selected])).toEqual([[true, ['B']], [false, ['A']]]);
+    expect((await repo.getAttempts(uid, 10, 1500)).map((a) => a.created_at)).toEqual([2000]);
+    expect(await repo.getAttempts(uid, 1)).toHaveLength(1);
   });
   it('isolates users', async () => { expect(await repo.getProgress(other)).toEqual([]); expect(await repo.getAttempts(other)).toEqual([]); expect(await repo.listExams(other)).toEqual([]); });
   it('bookmarks toggle idempotently', async () => {

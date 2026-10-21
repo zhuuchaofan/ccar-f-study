@@ -15,7 +15,8 @@ export interface Repo {
   sessionUser(tokenHash: string, now: number): Promise<SessionUser | null>;
   recordAttempt(userId: string, num: number, selected: string[], isCorrect: boolean, ms: number | null, mode: string | null, now?: number): Promise<Progress>;
   getProgress(userId: string): Promise<ProgressRow[]>;
-  getAttempts(userId: string, limit?: number): Promise<AttemptRow[]>;
+  /** Newest first; `since` (ms) keeps only attempts at or after that time. */
+  getAttempts(userId: string, limit?: number, since?: number): Promise<AttemptRow[]>;
   getBookmarks(userId: string): Promise<number[]>;
   setBookmark(userId: string, num: number, on: boolean): Promise<void>;
   getLessonStatus(userId: string): Promise<Record<string, string>>;

@@ -1,2 +1,2 @@
-import Stats from '@/components/Stats';
+import Stats from '@/components/study/Stats';
 export default function Page() { return <Stats />; }

@@ -1,8 +1,8 @@
 'use client';
 import { useEffect } from 'react';
 import { useStudy } from './useStudy';
-import { Empty, Loading, loginHref } from './ui';
-import { CATEGORY_TO_DOMAIN_JS, DOMAIN_ZH } from './meta';
+import { Empty, Loading, loginHref } from '../ui/ui';
+import { CATEGORY_TO_DOMAIN_JS, DOMAIN_ZH } from '../meta';
 export default function Stats() {
   const { data, state } = useStudy();
   useEffect(() => { if (state === 'anon') location.replace(loginHref('/stats')); }, [state]);
