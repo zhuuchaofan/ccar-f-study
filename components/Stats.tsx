@@ -18,7 +18,7 @@ export default function Stats() {
   const days = Array.from({ length: 28 }, (_, i) => day(Date.now() - (27 - i) * 86400000));
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">学习统计</h1>
+      <h1 className="t-title">学习统计</h1>
       <section><h2 className="mb-2 font-bold">各领域掌握度</h2><ul className="space-y-3">{rows.map((r) => (
         <li key={r.d} className="card p-3"><div className="flex justify-between text-sm"><span>领域 {r.d}：{DOMAIN_ZH[r.d]}</span><span className="muted">{r.acc === null ? '未开始' : `正确率 ${r.acc}% · 掌握度 ${r.m}%`}</span></div><div className="bar mt-2" role="img" aria-label={`掌握度 ${r.m}%`}><i style={{ width: `${r.m}%` }} /></div></li>))}</ul></section>
       <section><h2 className="mb-2 font-bold">薄弱领域排行</h2>{rank.length === 0 ? <p className="muted text-sm">做题后显示。</p> : <ol className="list-decimal pl-5 text-sm">{rank.map((r) => <li key={r.d}>领域 {r.d}：{DOMAIN_ZH[r.d]}（{r.acc}%）</li>)}</ol>}</section>

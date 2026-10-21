@@ -30,8 +30,8 @@ export default function Markdown({ src }: { src: string }) {
       i++; blocks.push(<pre key={k++} className="code-block" data-lang={lang || undefined}><code>{body.join('\n')}</code></pre>); continue;
     }
     if (l.startsWith('### ')) { blocks.push(<h3 key={k++} className="mt-5 font-bold">{inline(l.slice(4))}</h3>); i++; continue; }
-    if (l.startsWith('## ')) { blocks.push(<h2 key={k++} className="mt-8 border-b pb-1 text-lg font-bold" style={{ borderColor: 'var(--line)' }}>{inline(l.slice(3))}</h2>); i++; continue; }
-    if (l.startsWith('# ')) { blocks.push(<h2 key={k++} className="mt-8 text-lg font-bold">{inline(l.slice(2))}</h2>); i++; continue; }
+    if (l.startsWith('## ')) { blocks.push(<h2 key={k++} className="mt-8 border-b pb-1 t-h2" style={{ borderColor: 'var(--line)' }}>{inline(l.slice(3))}</h2>); i++; continue; }
+    if (l.startsWith('# ')) { blocks.push(<h2 key={k++} className="mt-8 t-h2">{inline(l.slice(2))}</h2>); i++; continue; }
     if (l.startsWith('> ')) {
       const body: string[] = []; while (i < lines.length && lines[i].startsWith('>')) body.push(lines[i++].replace(/^>\s?/, ''));
       blocks.push(<blockquote key={k++} className="tip">{inline(body.join(' '))}</blockquote>); continue;

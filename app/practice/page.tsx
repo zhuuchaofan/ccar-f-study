@@ -12,7 +12,7 @@ const modes = [
 export default function Practice() {
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">练习</h1>
+      <h1 className="t-title">练习</h1>
       <ul className="grid gap-3 sm:grid-cols-2">{modes.map((m) => <li key={m.href}><Link className="card block p-4" href={m.href}><b>{m.t}</b><span className="muted block text-sm">{m.s}</span></Link></li>)}</ul>
       <section><h2 className="mb-2 font-bold">按领域</h2>
         <ul className="grid gap-3 sm:grid-cols-2">{[1, 2, 3, 4, 5].map((d) => <li key={d}><Link className="card block p-4" href={`/practice/run?mode=seq&domain=${d}`}>领域 {d}：{DOMAIN_ZH[d]}</Link></li>)}</ul>

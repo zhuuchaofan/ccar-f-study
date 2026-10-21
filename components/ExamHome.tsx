@@ -10,7 +10,7 @@ export default function ExamHome() {
   return (
     <div className="space-y-6">
       <section className="card space-y-3 p-6">
-        <h1 className="text-2xl font-bold">模拟考试</h1>
+        <h1 className="t-title">模拟考试</h1>
         <ul className="muted list-disc space-y-1 pl-5 text-sm">
           <li>60 题，限时 120 分钟，题目按官方领域权重（27/18/20/20/15%）从题库随机抽取，不会同时抽到疑似重复的两道题。</li>
           <li>答题过程中不显示对错，可以标记、跳题、回看；时间到自动交卷。</li>

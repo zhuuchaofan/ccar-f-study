@@ -10,7 +10,7 @@ export default function QuestionList({ items }: { items: { num: number; domain: 
   const rows = items.filter((i) => (!d || i.domain === d) && (f === 'all' || (f === 'wrong' ? (prog.get(i.num)?.streak_wrong ?? 0) > 0 : !prog.has(i.num))));
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">题库 <span className="muted text-base font-normal">（{rows.length} / {items.length}）</span></h1>
+      <h1 className="t-title">题库 <span className="muted text-base font-normal">（{rows.length} / {items.length}）</span></h1>
       <div className="flex flex-wrap gap-2">
         <select aria-label="领域" className="field" style={{ width: 'auto' }} value={d} onChange={(e) => setD(Number(e.target.value))}><option value={0}>全部领域</option>{[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>领域 {n}：{DOMAIN_ZH[n]}</option>)}</select>
         <select aria-label="状态" className="field" style={{ width: 'auto' }} value={f} onChange={(e) => setF(e.target.value as any)}><option value="all">全部</option><option value="wrong">答错过</option><option value="new">没做过</option></select>

@@ -12,7 +12,7 @@ export default async function TS({ params }: { params: Promise<{ id: string }> }
   return (
     <div className="space-y-6">
       <p className="muted text-sm"><Link href="/syllabus">课程大纲</Link> › 领域 {t.domain}：{DOMAIN_ZH[t.domain]}</p>
-      <header><h1 className="text-2xl font-bold">{t.id}　{t.title_zh}</h1><p className="muted" lang="ja">タスクステートメント{t.id}：{t.title_ja}</p></header>
+      <header><h1 className="t-title">{t.id}　{t.title_zh}</h1><p className="muted" lang="ja">タスクステートメント{t.id}：{t.title_ja}</p></header>
       <LessonStatus ts={t.id} />
       <details className="card p-4"><summary className="cursor-pointer font-bold">官方大纲原文（日文）：知识 {t.knowledge.length} 条 · 技能 {t.skills.length} 条</summary>
         <h2 className="mt-3 text-sm font-bold">需要掌握的知识</h2><ul className="mt-1 list-disc space-y-1 pl-5 text-sm" lang="ja">{t.knowledge.map((k, i) => <li key={i}>{k}</li>)}</ul>

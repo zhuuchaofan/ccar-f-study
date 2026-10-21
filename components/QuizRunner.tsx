@@ -71,17 +71,13 @@ export default function QuizRunner() {
   const te = lang !== 'en' ? res?.i18n?.[lang] : undefined;
   const label = (l: string) => res ? (res.answer.includes(l) ? 'ok' : sel.includes(l) ? 'bad' : '') : sel.includes(l) ? 'sel' : '';
   return (
-    <article className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <span className="muted">{idx + 1} / {nums.length}</span><span className="tag">第 {q.num} 题</span><span className="tag">领域 {q.domain}：{DOMAIN_ZH[q.domain]}</span>
-        <span className="tag tag-warn">第三方题库 · 未审核</span>
-        {q.duplicate_of && <span className="tag tag-warn">疑似与第 {q.duplicate_of} 题重复</span>}
-        <button className="btn ml-auto" onClick={bookmark} aria-pressed={marks.has(q.num)}>{marks.has(q.num) ? '★ 已收藏' : '☆ 收藏'}</button>
+    <article className="space-y-4 pb-20">
+      <div className="flex items-center gap-2 text-sm">
+        <span className="muted shrink-0">{idx + 1} / {nums.length}</span><span className="tag shrink-0">领域 {q.domain}</span>
+        <div role="tablist" aria-label="语言" className="seg ml-auto">{LANGS.map(([k, n]) => <button key={k} role="tab" aria-selected={lang === k} onClick={() => setLang(k)}>{n}</button>)}</div>
+        <button className="btn !min-h-10 !px-3" onClick={bookmark} aria-pressed={marks.has(q.num)} aria-label={marks.has(q.num) ? '取消收藏' : '收藏'}>{marks.has(q.num) ? '★' : '☆'}</button>
       </div>
-      <div role="tablist" aria-label="语言" className="flex gap-2">
-        {LANGS.map(([k, n]) => <button key={k} role="tab" aria-selected={lang === k} className={`btn ${lang === k ? 'btn-primary' : ''}`} onClick={() => setLang(k)}>{n}</button>)}
-      </div>
-      {tq && <p className="text-sm"><span className="tag tag-warn">AI 翻译草稿</span> <span className="muted">以英文原文为准</span></p>}
+      <p className="muted text-xs">第 {q.num} 题 · {DOMAIN_ZH[q.domain]} · 第三方题库，未审核{tq ? ' · AI 翻译草稿，以英文为准' : ''}{q.duplicate_of ? ` · 疑似与第 ${q.duplicate_of} 题重复` : ''}</p>
       {lang !== 'en' && !tq && <p className="card p-3 text-sm" style={{ background: 'var(--warn-bg)', color: 'var(--warn)' }}>这道题的{lang === 'zh' ? '中文' : '日文'}译文尚未生成，当前显示英文原文。</p>}
       <p className="card whitespace-pre-line p-4 leading-relaxed" lang={tq ? lang : 'en'} data-testid="stem">{tq?.stem ?? q.stem}</p>
       {tq && <details className="text-sm"><summary className="muted cursor-pointer">查看英文原文</summary><div className="card mt-2 space-y-1 p-3" lang="en"><p className="whitespace-pre-line">{q.stem}</p>{q.options.map((o) => <p key={o.label}><b>{o.label}.</b> {o.text}</p>)}</div></details>}
@@ -92,15 +88,17 @@ export default function QuizRunner() {
           </button>))}
       </div>
       {err && <p role="alert" style={{ color: 'var(--bad)' }}>{err}</p>}
-      {!res ? <button className="btn btn-primary w-full sm:w-auto" disabled={sel.length === 0} onClick={submit} data-testid="submit">提交答案（Enter）</button> : (
+      <div className="actionbar"><div>{!res
+        ? <button className="btn btn-primary w-full" disabled={sel.length === 0} onClick={submit} data-testid="submit">提交答案<span className="hidden sm:inline">（Enter）</span></button>
+        : <button className="btn btn-primary w-full" onClick={next} data-testid="next">{idx + 1 < nums.length ? '下一题' : '完成'}<span className="hidden sm:inline">（Enter）</span></button>}</div></div>
+      {res && (
         <section className="space-y-3" data-testid="result" aria-live="polite">
           <p className="card p-3 font-bold" style={{ color: res.correct ? 'var(--ok)' : 'var(--bad)' }}>{res.correct ? '回答正确' : `回答错误，正确答案：${res.answer.join('、')}`}　<span className="muted font-normal">掌握度 {res.progress.mastery}%</span></p>
           {te && <p className="card p-3 text-sm" lang={lang}><b>{lang === 'ja' ? 'ポイント：' : '要点：'}</b>{te.takeaway}</p>}
-          <div className="card p-4" data-testid="explanation"><p className="mb-1 text-sm"><span className="tag tag-warn">{te ? '题库解析 · AI 翻译草稿' : '第三方题库自带解析（英文原文）'}</span> <span className="tag">出处未核实</span> <span className="muted">PDF 第 {res.source.pdf_pages[0]}{res.source.pdf_pages[1] !== res.source.pdf_pages[0] ? `–${res.source.pdf_pages[1]}` : ''} 页</span></p><p className="text-sm leading-relaxed" lang={te ? lang : 'en'}>{te?.explanation ?? res.explanation_en}</p>
+          <div className="card p-4" data-testid="explanation"><p className="mb-1 text-sm"><span className="muted">{te ? '题库解析 · AI 翻译草稿' : '题库自带解析（英文原文）'} · 出处未核实 · PDF 第 {res.source.pdf_pages[0]}{res.source.pdf_pages[1] !== res.source.pdf_pages[0] ? `–${res.source.pdf_pages[1]}` : ''} 页</span></p><p className="text-sm leading-relaxed" lang={te ? lang : 'en'}>{te?.explanation ?? res.explanation_en}</p>
             {te && <details className="mt-2 text-sm"><summary className="muted cursor-pointer">查看英文原文解析</summary><p className="mt-1 leading-relaxed" lang="en">{res.explanation_en}</p></details>}</div>
           {res.task_statement ? <p className="text-sm">对应大纲：<Link className="underline" href={`/syllabus/${res.task_statement.id}`}>{res.task_statement.id} {res.task_statement.title_zh}</Link>（题目归类为 AI 判断）</p>
             : <p className="muted text-sm">这道题还没有对应到大纲条目。可先到 <Link className="underline" href="/syllabus">课程大纲</Link> 对照 {DOMAIN_ZH[q.domain]} 领域。</p>}
-          <button className="btn btn-primary" onClick={next} data-testid="next">{idx + 1 < nums.length ? '下一题（Enter）' : '完成'}</button>
         </section>)}
     </article>
   );
