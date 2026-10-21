@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { DOMAIN_ZH } from '@/components/meta';
+import { DOMAIN_ZH, QUESTION_COUNT } from '@/components/meta';
 const modes = [
-  { href: '/practice/run?mode=seq', t: '顺序刷题', s: '按题号 1 → 152' },
+  { href: '/practice/run?mode=seq', t: '顺序刷题', s: `按题号 1 → ${QUESTION_COUNT}` },
   { href: '/practice/run?mode=random', t: '随机刷题', s: '打乱顺序' },
   { href: '/practice/run?mode=unanswered', t: '没做过的题', s: '只做新题' },
   { href: '/practice/run?mode=due', t: '到期复习', s: '间隔重复安排到今天的题' },
