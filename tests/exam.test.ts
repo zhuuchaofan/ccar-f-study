@@ -1,8 +1,7 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 process.env.CCAR_DB = ':memory:';
 import { getQuestions, getQuestion, domainOf, publicQuestion, DUPLICATE_PAIRS } from '@/core/content';
-import { examBlueprint, pickExam, grade, exams, EXAM_SIZE } from '@/core/exam';
-import { createUser } from '@/core/auth';
+import { examBlueprint, pickExam, grade, EXAM_SIZE } from '@/core/exam';
 const seeded = (s: number) => () => ((s = (s * 1103515245 + 12345) % 2 ** 31) / 2 ** 31);
 describe('exam blueprint and sampling', () => {
   it('blueprint follows domain weights and sums to 60', () => { expect(examBlueprint()).toEqual({ 1: 16, 2: 11, 3: 12, 4: 12, 5: 9 }); });
@@ -22,17 +21,6 @@ describe('exam blueprint and sampling', () => {
     expect(r.by_domain[domainOf(q1)].correct).toBeGreaterThanOrEqual(1); void q2;
   });
 });
-describe('exam storage', () => {
-  let uid = 0, other = 0;
-  beforeAll(() => { uid = createUser('ex1@x.com', 'password1')!; other = createUser('ex2@x.com', 'password1')!; });
-  it('creates, isolates by user, and submits only once', () => {
-    const id = exams.create(uid, [1, 2, 3]);
-    expect(exams.get(other, id)).toBeNull();
-    const r = grade([1, 2, 3], {});
-    expect(exams.submit(uid, id, r)).toBe(true); expect(exams.submit(uid, id, r)).toBe(false);
-    expect(exams.get(uid, id)!.result!.total).toBe(3); expect(exams.list(uid).length).toBe(1);
-  });
-});
 describe('translations', () => {
   it('translated questions expose zh/ja stems before answering but never explanations', () => {
     const p = publicQuestion(getQuestion(1)!);
@@ -40,4 +28,13 @@ describe('translations', () => {
     expect(JSON.stringify(p)).not.toMatch(/explanation|takeaway/);
   });
   it('every translated question maps to a task statement', () => { for (const q of getQuestions()) if (q.i18n.zh) expect(q.task_statement).toMatch(/^[1-5]\.[1-7]$/); });
+});
+describe('invite code', () => {
+  it('is open without INVITE_CODE and enforced with it', async () => {
+    const { inviteOk, inviteRequired } = await import('@/core/auth');
+    delete process.env.INVITE_CODE; expect(inviteRequired()).toBe(false); expect(inviteOk(undefined)).toBe(true);
+    process.env.INVITE_CODE = 'sesame-123';
+    expect(inviteRequired()).toBe(true); expect(inviteOk('sesame-123')).toBe(true); expect(inviteOk('nope')).toBe(false); expect(inviteOk(undefined)).toBe(false);
+    delete process.env.INVITE_CODE;
+  });
 });

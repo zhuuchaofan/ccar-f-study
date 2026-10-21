@@ -9,8 +9,8 @@ export async function GET(req: Request) {
   const mode = url.searchParams.get('mode') || 'seq';
   const domain = Number(url.searchParams.get('domain') || 0);
   const noDup = url.searchParams.get('dedupe') === '1';
-  const prog = new Map(repo.getProgress(u.id).map((p) => [p.question_num, p]));
-  const marks = new Set(repo.getBookmarks(u.id));
+  const prog = new Map((await repo.getProgress(u.id)).map((p) => [p.question_num, p]));
+  const marks = new Set(await repo.getBookmarks(u.id));
   const now = Date.now();
   let qs = getQuestions();
   if (domain) qs = qs.filter((q) => domainOf(q) === domain);

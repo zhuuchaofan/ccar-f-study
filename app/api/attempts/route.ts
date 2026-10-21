@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   const sel = [...new Set(p.data.selected)].sort();
   if (!sel.every((l) => labels.has(l))) return json({ error: 'invalid_option' }, 400);
   const correct = sel.length === q.answer.length && sel.every((l, i) => l === [...q.answer].sort()[i]);
-  const progress = repo.recordAttempt(u.id, q.num, sel, correct, p.data.ms ?? null, p.data.mode ?? null);
+  const progress = await repo.recordAttempt(u.id, q.num, sel, correct, p.data.ms ?? null, p.data.mode ?? null);
   return json({
     correct, answer: q.answer, explanation_en: q.explanation_en, i18n: explanations(q), task_statement: q.task_statement ? { id: q.task_statement, title_zh: getTaskStatement(q.task_statement)?.title_zh ?? '' } : null,
     source: { type: q.source_type, name: q.source_name, pdf_pages: q.pdf_pages, review_status: q.review_status },

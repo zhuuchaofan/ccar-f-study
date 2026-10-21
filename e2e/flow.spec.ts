@@ -72,7 +72,7 @@ test('language tabs show AI translation drafts with the English original availab
 });
 test('mock exam: 60 questions, no feedback until submit, then per-domain results', async ({ page }) => {
   await register(page, email());
-  await page.goto('/exam'); await page.getByTestId('exam-start').click(); await page.waitForURL(/\/exam\/\d+/);
+  await page.goto('/exam'); await page.getByTestId('exam-start').click(); await page.waitForURL(/\/exam\/[A-Za-z0-9]+/);
   await expect(page.getByText('第 1 / 60 题')).toBeVisible();
   await expect(page.getByTestId('timer')).toContainText(/1:59:|2:00:00/);
   for (let i = 0; i < 3; i++) { await page.getByTestId('opt-A').click(); await expect(page.getByText('回答正确')).toHaveCount(0); await page.getByTestId('exam-next').click(); }

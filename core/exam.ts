@@ -1,4 +1,3 @@
-import { getDb } from './db';
 import { DOMAIN_WEIGHTS, DUPLICATE_PAIRS, domainOf, getQuestion, type Question } from './content';
 
 export const EXAM_SIZE = 60;
@@ -42,20 +41,3 @@ export function grade(nums: number[], answers: Answers): ExamResult {
   });
   return { correct: items.filter((i) => i.correct).length, total: items.length, by_domain, items };
 }
-
-export type ExamRow = { id: number; nums: number[]; started_at: number; submitted_at: number | null; result: ExamResult | null };
-const row = (r: any): ExamRow => ({ id: r.id, nums: JSON.parse(r.nums), started_at: r.started_at, submitted_at: r.submitted_at, result: r.result ? JSON.parse(r.result) : null });
-
-export const exams = {
-  create(userId: number, nums: number[], now = Date.now()): number {
-    return Number(getDb().prepare('INSERT INTO exams(user_id,nums,started_at) VALUES(?,?,?)').run(userId, JSON.stringify(nums), now).lastInsertRowid);
-  },
-  get(userId: number, id: number): ExamRow | null {
-    const r = getDb().prepare('SELECT * FROM exams WHERE id=? AND user_id=?').get(id, userId); return r ? row(r) : null;
-  },
-  list(userId: number): ExamRow[] { return (getDb().prepare('SELECT * FROM exams WHERE user_id=? ORDER BY started_at DESC LIMIT 50').all(userId) as any[]).map(row); },
-  /** Stores the result once; returns false if the exam was already submitted. */
-  submit(userId: number, id: number, result: ExamResult, now = Date.now()): boolean {
-    return getDb().prepare('UPDATE exams SET submitted_at=?, result=? WHERE id=? AND user_id=? AND submitted_at IS NULL').run(now, JSON.stringify(result), id, userId).changes === 1;
-  },
-};
