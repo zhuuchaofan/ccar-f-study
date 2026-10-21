@@ -10,6 +10,9 @@ SERVICE="${SERVICE:-ccar-f-study}"
 RUNTIME_SA_NAME="${RUNTIME_SA_NAME:-ccar-f-study-run}"
 RUNTIME_SA="${RUNTIME_SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 INVITE_SECRET="${INVITE_SECRET:-ccar-invite-code}"
+# Optional: OAuth web client ID enables "Continue with Google" (not a secret). See docs/deploy-cloud-run.md.
+GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-}"
+ENV_VARS="STORAGE=firestore,FIRESTORE_PROJECT_ID=${PROJECT_ID}${GOOGLE_CLIENT_ID:+,GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}}"
 
 gcloud config set project "$PROJECT_ID" >/dev/null
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com firestore.googleapis.com secretmanager.googleapis.com
@@ -36,7 +39,7 @@ gcloud run deploy "$SERVICE" \
   --allow-unauthenticated \
   --port 8080 --cpu 1 --memory 512Mi --concurrency 40 \
   --min-instances 0 --max-instances 2 \
-  --set-env-vars "STORAGE=firestore,FIRESTORE_PROJECT_ID=${PROJECT_ID}" \
+  --set-env-vars "$ENV_VARS" \
   --set-secrets "INVITE_CODE=${INVITE_SECRET}:latest"
 
 gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)'

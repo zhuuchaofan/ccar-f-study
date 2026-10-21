@@ -1,6 +1,8 @@
 import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { repo } from './repo';
+import type { Repo } from './repo';
+
 
 const COOKIE = 'ccar_session';
 const TTL = 30 * 24 * 3600 * 1000;
@@ -34,6 +36,19 @@ export function inviteOk(code: string | undefined) {
   if (!want) return true;
   const a = Buffer.from(sha(code ?? '')), b = Buffer.from(sha(want));
   return crypto.timingSafeEqual(a, b);
+}
+/**
+ * Sign in with a verified Google email. Existing accounts (same email) sign in directly;
+ * a new account needs the invite code. Google-created accounts get a hash that never matches a password.
+ */
+export async function googleLogin(email: string, invite?: string, store: Pick<Repo, 'findUser' | 'createUser'> = repo): Promise<{ id: string } | { error: 'invite_required' | 'invalid_invite' }> {
+  const e = email.toLowerCase();
+  const row = await store.findUser(e);
+  if (row) return { id: row.id };
+  if (inviteRequired() && invite === undefined) return { error: 'invite_required' };
+  if (!inviteOk(invite)) return { error: 'invalid_invite' };
+  const id = await store.createUser(e, 'google', Date.now()) ?? (await store.findUser(e))?.id;
+  return id ? { id } : { error: 'invalid_invite' };
 }
 export const inviteRequired = () => !!process.env.INVITE_CODE;
 export async function startSession(userId: string) {

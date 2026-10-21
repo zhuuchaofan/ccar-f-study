@@ -44,5 +44,5 @@ jobs:
           gcloud run deploy "$SERVICE" --project="$PROJECT_ID" --region="$REGION" --source . \
             --service-account="$RUNTIME_SA" --allow-unauthenticated --port=8080 \
             --cpu=1 --memory=512Mi --concurrency=40 --min-instances=0 --max-instances=2 \
-            --set-env-vars="STORAGE=firestore,FIRESTORE_PROJECT_ID=${PROJECT_ID}" \
+            --set-env-vars="STORAGE=firestore,FIRESTORE_PROJECT_ID=${PROJECT_ID}${{ vars.GOOGLE_CLIENT_ID && format(',GOOGLE_CLIENT_ID={0}', vars.GOOGLE_CLIENT_ID) || '' }}" \
             --set-secrets="INVITE_CODE=ccar-invite-code:latest"
