@@ -1,9 +1,10 @@
 import { z } from 'zod';
+import { MANIFEST } from '@/core/content';
 import { explanations, getQuestion, getTaskStatement } from '@/core/content';
 import { json, isJson, requireUser } from '@/core/http';
 import { repo } from '@/core/repo';
 import { mastery } from '@/core/srs';
-const Body = z.object({ num: z.number().int().min(1).max(152), selected: z.array(z.string().length(1)).min(1).max(6), ms: z.number().int().min(0).max(3_600_000).nullable().optional(), mode: z.string().max(30).optional() });
+const Body = z.object({ num: z.number().int().min(1).max(MANIFEST.question_count), selected: z.array(z.string().length(1)).min(1).max(6), ms: z.number().int().min(0).max(3_600_000).nullable().optional(), mode: z.string().max(30).optional() });
 export async function POST(req: Request) {
   const u = await requireUser(); if (!u) return json({ error: 'unauthorized' }, 401);
   if (!isJson(req)) return json({ error: 'bad_request' }, 400);

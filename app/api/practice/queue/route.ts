@@ -1,4 +1,4 @@
-import { getQuestions, domainOf, DUPLICATE_PAIRS } from '@/core/content';
+import { getQuestions, domainOf, DUPLICATE_PAIRS, MANIFEST } from '@/core/content';
 import { json, requireUser } from '@/core/http';
 import { repo } from '@/core/repo';
 import { isDue } from '@/core/srs';
@@ -31,7 +31,7 @@ export async function GET(req: Request) {
   if (mode === 'seq' && start) { const i = nums.findIndex((n) => n >= start); if (i > 0) nums = [...nums.slice(i), ...nums.slice(0, i)]; }
   const one = Number(url.searchParams.get('num') || 0);
   if (one) nums = nums.filter((n) => n === one);
-  const limit = Math.min(152, Math.max(0, Number(url.searchParams.get('limit') || 0)));
+  const limit = Math.min(MANIFEST.question_count, Math.max(0, Number(url.searchParams.get('limit') || 0)));
   if (limit) nums = nums.slice(0, limit);
   return json({ mode, domain: domain || null, nums });
 }
